@@ -19,3 +19,7 @@ outputs/
 *.pt
 *.ckpt
 .env
+
+# Exploration notebooks (may contain patient data in outputs)
+notebooks/
+*.ipynb
