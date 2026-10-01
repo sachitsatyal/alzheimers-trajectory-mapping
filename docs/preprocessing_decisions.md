@@ -56,3 +56,4 @@ Codebook: TARCC_Codebook.xlsx (20200813 version). Data: TARCC_Main_Data.xlsx.
 - MMSE (0–30): no out-of-range values. MMSE = 0 kept when CDR global ≥ 2 (117 visits);
   set to missing when CDR global < 2 (15 visits, implausible).
 - Predictor side: forms F1, F2, B5 at partial visits are marked unobserved in the mask m_t.
+- Verified on full data: missing PSMS 523, IADL 2,483, NPIQ_SEV 527, NPIQ_COUNT 524, MMSE 15; all values in range.
