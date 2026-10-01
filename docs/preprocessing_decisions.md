@@ -43,3 +43,16 @@ Codebook: TARCC_Codebook.xlsx (20200813 version). Data: TARCC_Main_Data.xlsx.
   Proteomics -999999 = below, -888888 = above, -777777 and 0 = missing;
   Quanterix -333 = below, -555 = above, -999/-888/-444 = missing.
   How to fill below/above-limit values: to be decided.
+
+  ## Outcomes (K = 5)
+- ~521 partial visits had forms F1, F2 and B5 not done, stored as 0:
+  PSMS=0 and IADL=0 coincide (522/523), NPI informant code 0 (undefined; valid 1–3) at the same visits,
+  and all 12 NPI items are "No" at every such visit. MMSE is present at 520 of them.
+- PSMS (6–30): total 0 → missing. Total always equals item sum.
+- IADL (8–31): total 0 → missing; any item = 0 ("not applicable") → missing (2,483 visits incl. the 522).
+  Not prorated: outcomes are never imputed. To check later: N/A rate by sex.
+- NPI-Q count (0–12) and severity (0–36): computed from the 12 items.
+  Missing when NPI informant = 0. Severity also missing if any "Yes" lacks a severity (6 visits).
+- MMSE (0–30): no out-of-range values. MMSE = 0 kept when CDR global ≥ 2 (117 visits);
+  set to missing when CDR global < 2 (15 visits, implausible).
+- Predictor side: forms F1, F2, B5 at partial visits are marked unobserved in the mask m_t.
