@@ -33,4 +33,13 @@ Codebook: TARCC_Codebook.xlsx (20200813 version). Data: TARCC_Main_Data.xlsx.
 - Decision: patients are not merged. Train/validation/test splits are grouped by STUDYID.
 
 ## Open questions
-- Meaning of STUDYID and A1_INMDS (ask TARCC / advisor).
+- Meaning of STUDYID.
+
+## Special codes (parsed per variable from the codebook)
+- Codebook matched to data: 943 of 946 variables (A1_FORMVER, A1_REFER absent; TARC_PID is an ID).
+- Each variable's codes are classified into: missing, not applicable, below detection, above detection.
+- "None reported" (e.g. 88 in secondary race) is a real answer, not missing.
+- Biomarker detection limits are not missing values:
+  Proteomics -999999 = below, -888888 = above, -777777 and 0 = missing;
+  Quanterix -333 = below, -555 = above, -999/-888/-444 = missing.
+  How to fill below/above-limit values: to be decided.
