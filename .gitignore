@@ -1,0 +1,21 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# TARCC data and outputs - never commit
+data/
+outputs/
+*.csv
+*.xlsx
+*.sav
+*.sas7bdat
+*.pt
+*.ckpt
+.env
