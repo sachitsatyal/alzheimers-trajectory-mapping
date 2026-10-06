@@ -17,7 +17,9 @@ model:
   decoder_dropout: 0.2
   samples_train: 8          # S
   samples_test: 100         # S_test
-  mixture_components: 4     # J; select from 2..6 on validation
+  n_subtypes: 4             # J; select from 2..6 on validation
+  subtype_embedding_dim: 16
+  membership_hidden: 64
   kappa_min: 0.01
   # encoder options
   token_norm: true          # LayerNorm per category token (recommended)
@@ -37,5 +39,6 @@ training:
   max_epochs: 100
   patience: 10
   velocity_penalty: 1.0e-3  # lambda
-  prior_warmup_epochs: 10   # TODO: standard-normal prior before GMM init
+  subtype_temperature_start: 5.0   # soft assignments early; anneal to 1
+  subtype_temperature_epochs: 20
   kl_anneal_epochs: 20      # TODO: beta linear 0 -> 1

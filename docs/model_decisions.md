@@ -6,7 +6,7 @@ configs/default.yaml, with the paper's choice as default where it has one.
 Choices are made on the validation split; the test split is used once, at the end.
 
 ## Aims
-- Aim 1: progression subtypes (mixture prior over the latent state).
+- Aim 1: patient-level progression subtypes that shape the dynamics; new patients assigned from baseline, refined per visit.
 - Aim 2: next-visit forecasting of function (PSMS, IADL), behavior (NPI-Q severity,
   count) and cognition (MMSE), with uncertainty and per-domain category attention.
 - Aim 3: what-if simulation. Presented as model-based scenario exploration unless a
@@ -41,7 +41,7 @@ Choices are made on the validation split; the test split is used once, at the en
   NPI-Q severity. NPI-Q count is capped at 12, so negative binomial is unsuitable.
 - RBM panel (116 markers, 16% of patients): keep or drop, by panel ablation.
 
-   ## Piece 3: history encoder and posterior (history.py; paper Sec. III-D, III-E)
+## Piece 3: history encoder and posterior (history.py; paper Sec. III-D, III-E)
    - Pre-norm causal transformer (+ final LayerNorm); padding excluded via key mask;
      nested-tensor path disabled. Test: changing visit t+1 leaves h~_1..t unchanged.
    - Diagonal Gaussian posterior; log-variance clamped to [-10, 5] for stability.
@@ -51,3 +51,18 @@ Choices are made on the validation split; the test split is used once, at the en
      context with vs without ABC history (piece 6).
    - Subtypes are per visit (history-conditioned states). Report at the last visit;
      measure stability across a patient's visits.
+
+## Piece 4 (redesigned): patient-level progression subtypes (subtypes.py)
+   - Replaces the paper's per-visit mixture prior (Sec. III-F): that design gives
+     visit-level clusters of the latent state, likely recovering disease stage, and
+     subtypes would not affect forecasts.
+   - Each patient has one discrete subtype c, fixed over time, conditioning the dynamics
+     f(z, c) (piece 5). Stage lives in z; subtype = how a patient progresses from there.
+   - Membership network: P(c | baseline visit) assigns new patients at enrollment;
+     updated by Bayes after each visit (online posterior uses only past transitions).
+   - Objective: log p(Y_i) = logsumexp_c [log P(c | baseline) + sum_t l_t(c)], exact over J.
+   - Prior on z: standard normal.
+   - Safeguard: temperature annealing (5 -> 1) against component starvation; subtype
+     embeddings initialized apart (std 1). Monitor subtype sizes each epoch.
+   - Related work: latent class trajectory models (lcmm, Proust-Lima); SuStaIn's
+     stage/subtype separation. Paper Sec. III-F and related work to be rewritten.
