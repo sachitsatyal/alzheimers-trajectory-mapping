@@ -80,3 +80,18 @@ Codebook: TARCC_Codebook.xlsx (20200813 version). Data: TARCC_Main_Data.xlsx.
   Clock from 2010; AMNART from 2011 (then carried forward: premorbid, stable);
   Animal fluency before 2010; VR I/II, siblings in 2007; X1 decline reports from 2013.
 - Transition years are treated as inactive: loses a few real zeros, never admits filler.
+
+## Cleaned data (transforms.py)
+- 14,655 visits x 328 inputs: Demographic 4, Clinical 73, Biomarker 171, Genomic 4,
+  Social 26, Caregiver 19, ABC history 31 (one-hot expanded). Static: 5 covariates per patient.
+- Biomarkers placed only at the panel's assay visit (_tp), carried forward, never backward;
+  "years since assay" added per panel. Raw RBM had 1 value outside its assay visit (ignored).
+- Panel coverage: Proteomics 2,193 patients (60%), Quanterix 1,882 (51%), RBM 594 (16%).
+  RBM: 116 of 168 markers from 16% of patients -> candidate for panel ablation.
+- APOE e4 unknown for 285 patients (7.8%): uses the embedding's reserved missing index.
+
+## Model-ready tensors (sequences.py; run: uv run python scripts/preprocess.py)
+- Split by STUDYID, stratified by baseline dementia, seed 42: train 2,567 / val 552 / test 551 patients;
+  forecast pairs 7,656 / 1,644 / 1,685 (total 10,985). Demented at baseline 36% / 35% / 37%.
+- Standardization and detection-limit fills fit on training visits only; missing -> 0 with mask 0.
+- Tensors: X, M (patients x 13 x 328), tau, dt_next, Y, MU (shifted outcomes), PI, S.
