@@ -18,7 +18,7 @@ META = {
 CFG = {
     "data": {},
     "model": {"d": 16, "encoder_layers": 1, "encoder_heads": 2, "encoder_ff": 32, "dropout": 0.0,
-              "time2vec_k": 4, "latent_dim": 4, "velocity_hidden": 16, "ode_steps": 2,
+              "time2vec_k": 4, "latent_blocks": {"S": 2, "A": 2, "B": 2, "C": 2}, "velocity_hidden": 16, "ode_steps": 2,
               "decoder_hidden": 16, "decoder_dropout": 0.0, "kappa_min": 0.01, "samples_train": 2,
               "n_subtypes": 2, "subtype_embedding_dim": 4, "membership_hidden": 8},
     "training": {"seed": 0, "batch_size": 4, "lr": 1e-3, "weight_decay": 0.0, "grad_clip": 1.0,
@@ -64,3 +64,14 @@ def test_end_to_end_training(tmp_path):
     lines = (tmp_path / "run" / "log.jsonl").read_text().strip().splitlines()
     record = json.loads(lines[-1])
     assert set(record["val"]["mae"]) == set(META["outcomes"])
+
+
+def test_log_contains_interaction_map(tmp_path):
+    for split in ("train", "val"):
+        write_split(tmp_path, split)
+    (tmp_path / "meta.json").write_text(json.dumps(META))
+    cfg = {**CFG, "data": {"processed_dir": str(tmp_path)},
+           "training": {**CFG["training"], "max_epochs": 1}}
+    train(cfg, tmp_path / "run", device="cpu", verbose=False)
+    record = json.loads((tmp_path / "run" / "log.jsonl").read_text().splitlines()[-1])
+    assert "A<-B" in record["interaction_map"]["0"]

@@ -57,14 +57,15 @@ def to_device(batch, device):
 
 
 @torch.no_grad()
-def evaluate(model, loader, device, n_samples, free_bits=0.0) -> dict:
+def evaluate(model, loader, device, n_samples, free_bits=0.0, coupling_penalty=1e-3) -> dict:
     model.eval()
     totals, n_batches = {}, 0
     abs_err, counts = 0.0, 0.0
     for batch in loader:
         batch = to_device(batch, device)
         out = model(batch, n_samples)
-        _, stats = compute_loss(model, batch, out, beta=1.0, temperature=1.0, free_bits=free_bits)
+        _, stats = compute_loss(model, batch, out, beta=1.0, temperature=1.0, free_bits=free_bits,
+                                coupling_penalty=coupling_penalty)
         for k in ("loss", "nll", "kl_per_position", "active_units", "subtype_divergence"):
             totals[k] = totals.get(k, 0.0) + stats[k]
         n_batches += 1
@@ -115,20 +116,22 @@ def train(cfg: dict, run_dir, device=None, verbose=True) -> dict:
             out = model(batch, mcfg["samples_train"])
             loss, stats = compute_loss(model, batch, out, beta=beta,
                                        velocity_penalty=tcfg["velocity_penalty"],
-                                       temperature=temperature, free_bits=tcfg.get("free_bits", 0.0))
+                                       temperature=temperature, free_bits=tcfg.get("free_bits", 0.0),
+                                       coupling_penalty=tcfg.get("coupling_penalty", 1e-3))
             if not torch.isfinite(loss):
                 raise RuntimeError(f"non-finite loss at epoch {epoch}: {stats}")
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), tcfg["grad_clip"])
             optimizer.step()
-            for k in ("loss", "nll", "kl_per_position", "active_units", "subtype_divergence"):
+            for k in ("loss", "nll", "kl_per_position", "active_units", "subtype_divergence", "coupling_total"):
                 sums[k] = sums.get(k, 0.0) + stats[k]
             sizes = np.array(stats["subtype_sizes"]) if n == 0 else sizes + np.array(stats["subtype_sizes"])
             n += 1
 
-        val = evaluate(model, val_loader, device, mcfg["samples_train"], tcfg.get("free_bits", 0.0))
-        record = {"epoch": epoch, "beta": beta, "temperature": temperature, "seconds": round(time.time() - start, 1),
+        val = evaluate(model, val_loader, device, mcfg["samples_train"], tcfg.get("free_bits", 0.0),
+                       tcfg.get("coupling_penalty", 1e-3))
+        record = {"interaction_map": model.dynamics.interaction_map(), "epoch": epoch, "beta": beta, "temperature": temperature, "seconds": round(time.time() - start, 1),
                   "train": {k: v / n for k, v in sums.items()},
                   "train_subtype_sizes": (sizes / n).round(3).tolist(), "val": val}
         history.append(record)
@@ -147,7 +150,8 @@ def train(cfg: dict, run_dir, device=None, verbose=True) -> dict:
             mae = " ".join(f"{k}={v:.2f}" for k, v in val["mae"].items())
             print(f"ep {epoch:3d} b={beta:.2f} T={temperature:.2f} | train {record['train']['loss']:.3f} "
                   f"| val {val['loss']:.3f} | MAE {mae} | active={val['active_units']:.0f} "
-                  f"div={val['subtype_divergence']:.3f} sizes={record['train_subtype_sizes']}"
+                  f"div={val['subtype_divergence']:.3f} coup={record['train']['coupling_total']:.3f} "
+                  f"sizes={record['train_subtype_sizes']}"
                   f"{' *' if improved else ''} ({record['seconds']}s)")
         if waited >= tcfg["patience"]:
             break

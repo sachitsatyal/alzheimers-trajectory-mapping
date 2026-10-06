@@ -53,3 +53,9 @@ def test_logvar_clamped_and_gradients_flow():
     assert logvar.max() <= 5.0 and logvar.min() >= -10.0
     post.log_prob(z, mu, logvar).sum().backward()
     assert post.mu.weight.grad is not None
+
+
+def test_logvar_initialized_low():
+    post = GaussianPosterior(16, 8, logvar_init=-2.0)
+    _, logvar, _ = post(torch.zeros(1, 1, 16), 1)
+    assert torch.allclose(logvar, torch.full_like(logvar, -2.0))

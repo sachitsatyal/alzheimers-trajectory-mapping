@@ -7,6 +7,7 @@ Loss = [ -sum_i log p(Y_i) + beta * KL + lambda * R ] / (number of forecast posi
 
   KL  closed form KL(q(z_t | H_t) || N(0, I)) at forecast positions; optional free bits
   R   mean squared velocity at the start state (Eq. 15)
+  + coupling_penalty * group lasso on the ABC interaction map (keeps it sparse)
 Positions without a next real visit, and unobserved outcomes, contribute nothing.
 """
 
@@ -24,7 +25,8 @@ def next_visit_targets(batch):
     return pad(Y), pad(MU) * fp.unsqueeze(-1), fp
 
 
-def compute_loss(model, batch, out, beta=1.0, velocity_penalty=1e-3, temperature=1.0, free_bits=0.0):
+def compute_loss(model, batch, out, beta=1.0, velocity_penalty=1e-3, temperature=1.0, free_bits=0.0,
+                 coupling_penalty=1e-3):
     y_next, mu_next, fp = next_visit_targets(batch)
     n_pos = fp.sum().clamp_min(1.0)
 
@@ -48,7 +50,9 @@ def compute_loss(model, batch, out, beta=1.0, velocity_penalty=1e-3, temperature
     vel = model.dynamics.velocity_penalty(out["z0"], model.subtypes.embedding.weight)  # (J, S, B, T)
     r_term = (vel.mean((0, 1)) * fp).sum()
 
-    loss = (-log_marginal.sum() + beta * kl_term + velocity_penalty * r_term) / n_pos
+    coupling = model.dynamics.coupling_norms().sum() if model.dynamics.coupling else mu.new_zeros(())
+    loss = (-log_marginal.sum() + beta * kl_term + velocity_penalty * r_term) / n_pos \
+        + coupling_penalty * coupling
 
     with torch.no_grad():
         # Per-outcome negative log-likelihood, weighted by each patient's subtype probabilities.
@@ -65,5 +69,6 @@ def compute_loss(model, batch, out, beta=1.0, velocity_penalty=1e-3, temperature
             "subtype_divergence": out["z_delta"].std(0).mean().item(),
             "nll_per_outcome": dict(zip(model.decoders.outcomes, nll_k.tolist())),
             "forecast_positions": int(n_pos.item()),
+            "coupling_total": float(coupling),
         }
     return loss, stats

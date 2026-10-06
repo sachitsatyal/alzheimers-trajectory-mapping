@@ -35,10 +35,13 @@ class HistoryEncoder(nn.Module):
 class GaussianPosterior(nn.Module):
     """Amortized q(z_t | H_t). deterministic=True gives z = mu (paper ablation i)."""
 
-    def __init__(self, d: int, dz: int, deterministic: bool = False):
+    def __init__(self, d: int, dz: int, deterministic: bool = False, logvar_init: float = -2.0):
         super().__init__()
         self.mu = nn.Linear(d, dz)
         self.logvar = nn.Linear(d, dz)
+        # Start with moderately confident samples (sigma ~ 0.37 at -2) instead of
+        # sigma ~ 1: very noisy early samples teach the decoder to ignore z.
+        nn.init.constant_(self.logvar.bias, logvar_init)
         self.deterministic = deterministic
 
     def forward(self, h_tilde, n_samples: int):

@@ -11,7 +11,7 @@ META = {
                  "MMSE": {"domain": "C", "n": 30}},
 }
 CFG = {"d": 16, "encoder_layers": 1, "encoder_heads": 2, "encoder_ff": 32, "dropout": 0.0,
-       "time2vec_k": 4, "latent_dim": 4, "velocity_hidden": 16, "ode_steps": 4,
+       "time2vec_k": 4, "latent_blocks": {"S": 2, "A": 2, "B": 2, "C": 2}, "velocity_hidden": 16, "ode_steps": 4,
        "decoder_hidden": 16, "decoder_dropout": 0.0, "kappa_min": 0.01,
        "n_subtypes": 3, "subtype_embedding_dim": 4, "membership_hidden": 8}
 
@@ -54,10 +54,13 @@ def test_full_forward_and_finite_loss():
 
 
 def test_first_visit_outcomes_are_never_targets():
-    _, b, _, (loss1, _) = run()
+    # With the anchor on, visit-1 scores are an input (the anchor for forecasting visit 2),
+    # so check the target logic with the anchor off.
+    cfg = {**CFG, "decoder_anchor": False}
+    _, b, _, (loss1, _) = run(cfg)
     b2 = {**b, "Y": b["Y"].clone()}
     b2["Y"][:, 0] = 0
-    _, _, _, (loss2, _) = run(b=b2)
+    _, _, _, (loss2, _) = run(cfg, b=b2)
     assert torch.allclose(loss1, loss2)
 
 
@@ -74,7 +77,7 @@ def test_unobserved_outcome_contributes_nothing():
 
 
 def test_variants_run():
-    for extra in [{"dynamics": "none"}, {"dynamics": "sde"}, {"deterministic": True},
+    for extra in [{"dynamics": "none"}, {"dynamics": "sde"}, {"deterministic": True}, {"coupling": False},
                   {"decoder_exclude_categories": []}, {"decoder_uses_history": True}]:
         _, _, _, (loss, _) = run({**CFG, **extra})
         assert torch.isfinite(loss), extra
@@ -85,3 +88,12 @@ def test_free_bits_floor():
     loss_fb, _ = compute_loss(model, b, out, beta=1.0, free_bits=10.0)
     loss_0, _ = compute_loss(model, b, out, beta=1.0, free_bits=0.0)
     assert loss_fb >= loss_0  # a high floor can only raise the KL term
+
+
+def test_coupling_penalty_adds_to_loss():
+    model, b, out, _ = run()
+    with torch.no_grad():
+        model.dynamics.W["A_from_B"].fill_(1.0)
+    loss_on, stats = compute_loss(model, b, out, coupling_penalty=1.0)
+    loss_off, _ = compute_loss(model, b, out, coupling_penalty=0.0)
+    assert loss_on > loss_off and stats["coupling_total"] > 0
