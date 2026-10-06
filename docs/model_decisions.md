@@ -40,3 +40,14 @@ Choices are made on the validation split; the test split is used once, at the en
 - Likelihood per outcome: beta-binomial (paper) vs ordinal for PSMS, IADL,
   NPI-Q severity. NPI-Q count is capped at 12, so negative binomial is unsuitable.
 - RBM panel (116 markers, 16% of patients): keep or drop, by panel ablation.
+
+   ## Piece 3: history encoder and posterior (history.py; paper Sec. III-D, III-E)
+   - Pre-norm causal transformer (+ final LayerNorm); padding excluded via key mask;
+     nested-tensor path disabled. Test: changing visit t+1 leaves h~_1..t unchanged.
+   - Diagonal Gaussian posterior; log-variance clamped to [-10, 5] for stability.
+   - Risk: posterior collapse. The decoder context includes ABC history (current
+     outcomes) and can bypass z, which would void Aims 1 and 3. Plan: track active
+     latent units each epoch; free-bits option in the loss (piece 7); test decoder
+     context with vs without ABC history (piece 6).
+   - Subtypes are per visit (history-conditioned states). Report at the last visit;
+     measure stability across a patient's visits.

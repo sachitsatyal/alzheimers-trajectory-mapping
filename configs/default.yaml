@@ -26,6 +26,7 @@ model:
   use_masks: true
   use_time2vec: true
   drop_categories: []       # e.g. [BIOMARKER]
+  deterministic: false      # ablation: z = mu, no sampling, no KL
 
 training:
   seed: 42
