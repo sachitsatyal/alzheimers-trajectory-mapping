@@ -43,3 +43,4 @@ training:
   subtype_temperature_start: 5.0   # soft assignments early; anneal to 1
   subtype_temperature_epochs: 20
   kl_anneal_epochs: 20      # TODO: beta linear 0 -> 1
+  free_bits: 0.0            # turn on (e.g. 0.05) if active_units collapses

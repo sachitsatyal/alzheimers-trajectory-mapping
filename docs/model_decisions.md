@@ -87,3 +87,13 @@ Choices are made on the validation split; the test split is used once, at the en
    - h~ not fed to the decoder (paper); figure variant available as a switch.
    - NPI-Q severity and count modeled independently given z (count 0 implies severity 0);
      matters only for joint simulation (Aim 3).
+
+## Piece 7: model assembly and loss (model.py, loss.py; paper Sec. III-I)
+   - Per patient: log p(Y_i) = T * logsumexp_c [(log P(c | baseline) + sum_t l_t(c)) / T];
+     l_t(c) = masked beta-binomial log-likelihood of visit t+1, averaged over samples.
+   - KL to N(0, I) in closed form (paper used a Monte Carlo estimate for its mixture prior).
+   - Loss normalized by forecast positions; masked outcomes and padding contribute nothing
+     (tests: visit-1 outcomes never targets; masked target values have no effect).
+   - Free bits available (default 0); enable if active_units collapses.
+   - Logged per step: active_units, subtype_sizes, subtype_divergence, nll_per_outcome,
+     kl_per_position, velocity.
