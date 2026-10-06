@@ -76,3 +76,14 @@ Choices are made on the validation split; the test split is used once, at the en
      between subtypes from the same start; remedy: per-subtype additive velocity term.
    - Aim 3: roll out in ~1-year steps; horizons beyond observed gaps (max 5.7 y) are exploratory.
    - Ablation "none" also silences subtypes; decoder then receives dt and the subtype directly.
+
+## Piece 6: domain decoders (decoders.py; paper Sec. III-H)
+   - Per-domain history-dependent query; category attention over the visit's tokens;
+     MLP([z_delta; c^D]) -> beta-binomial per outcome. Formula verified against SciPy.
+   - Departure from paper (switch): decoders do not attend to ABC_HISTORY by default.
+     Current scores then reach the forecast only through z (guards against posterior
+     collapse; keeps subtypes/dynamics meaningful). Aim 2 attention then answers which
+     non-outcome categories shape each domain's forecast. Compare with [] on validation.
+   - h~ not fed to the decoder (paper); figure variant available as a switch.
+   - NPI-Q severity and count modeled independently given z (count 0 implies severity 0);
+     matters only for joint simulation (Aim 3).
