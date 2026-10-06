@@ -23,3 +23,6 @@ outputs/
 # Exploration notebooks (may contain patient data in outputs)
 notebooks/
 *.ipynb
+
+# Config CSVs hold decisions, not patient data: track them
+!configs/*.csv
