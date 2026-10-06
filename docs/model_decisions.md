@@ -66,3 +66,13 @@ Choices are made on the validation split; the test split is used once, at the en
      embeddings initialized apart (std 1). Monitor subtype sizes each epoch.
    - Related work: latent class trajectory models (lcmm, Proust-Lima); SuStaIn's
      stage/subtype separation. Paper Sec. III-F and related work to be rewritten.
+
+## Piece 5: latent dynamics (dynamics.py; paper Sec. III-G)
+   - dz/dr = dt * f(z, e_c), RK4 8 steps; batched over subtypes x samples x patients x visits.
+   - f: one tanh hidden layer (128), input [z; subtype embedding]; output layer initialized
+     small (near "no change"). Modes: ode (default), sde (Euler-Maruyama), none.
+   - RK4 error vs exact solution: 0.07% over a 3-year gap.
+   - Risk: field may ignore the subtype (identical dynamics). Monitor endpoint distance
+     between subtypes from the same start; remedy: per-subtype additive velocity term.
+   - Aim 3: roll out in ~1-year steps; horizons beyond observed gaps (max 5.7 y) are exploratory.
+   - Ablation "none" also silences subtypes; decoder then receives dt and the subtype directly.

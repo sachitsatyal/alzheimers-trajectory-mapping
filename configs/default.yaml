@@ -29,6 +29,7 @@ model:
   use_time2vec: true
   drop_categories: []       # e.g. [BIOMARKER]
   deterministic: false      # ablation: z = mu, no sampling, no KL
+  dynamics: ode             # ode (paper) | sde (variant v) | none (ablation iii)
 
 training:
   seed: 42
