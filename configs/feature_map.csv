@@ -770,35 +770,35 @@ X1_DeclineCl,X1_DECLINECL,X1,Clinician believes there is a decline in memory?,AB
 X1_DeclineAgePhy,X1_DECLINEAGEPHY,X1,Age decline began (based upon clinician assessment). Replaced by form X2 in Feb 2008,CLINICAL,years_since_onset,age decline began -> years since onset at visit
 X1_DeclineAge,X1_DECLINEAGE,X1,Age decline began (based upon caregiver's assessment),CLINICAL,years_since_onset,age decline began -> years since onset at visit
 X1_PhyEstDur,X1_PHYESTDUR,X1,Physician's estimate of duration (in years). Replaced by form X2 in Feb 2008,CLINICAL,numeric,estimated symptom duration
-X1_Hyperlip_Has,X1_HYPERLIP_HAS,X1,Has Hyperlipidemia? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
-X1_Hyperlip_SR,X1_HYPERLIP_SR,X1,Hyperlipidemia self report? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
-X1_Hyperlip_Med,X1_HYPERLIP_MED,X1,Use of cholesterol-lowering agents?(discontinued Jan 2010) ,CLINICAL,binary,risk factor / decline report
+X1_Hyperlip_Has,X1_HYPERLIP_HAS,X1,Has Hyperlipidemia? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_Hyperlip_SR,X1_HYPERLIP_SR,X1,Hyperlipidemia self report? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_Hyperlip_Med,X1_HYPERLIP_MED,X1,Use of cholesterol-lowering agents?(discontinued Jan 2010) ,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
 X1_Hyperlip_OthX,X1_HYPERLIP_OTHX,X1,Hyperlipidemia other specify (discontinued Jan 2010),DROP,,free text
 X1_CHgt220,X1_CHGT220,X1,Total serum cholesterol >22mg/dL? (discontinued Jan 2010),DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_Chol,X1_CHOL,X1,"If X1_CHgt220 is yes, then total serum level (discontinued Jan 2010)",DROP,,value recorded only above a threshold (censored)
 X1_LDLgt140,X1_LDLGT140,X1,LDL > 140Mg/dL? (discontinued Jan 2010),DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_LDL,X1_LDL,X1,If X1_LDLgt140>140 then LDL value (discontinued Jan 2010),DROP,,value recorded only above a threshold (censored)
-X1_DM_Has,X1_DM_HAS,X1,Has diabetes mellitus? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
-X1_DM_SR,X1_DM_SR,X1,Diabetes mellitus self report? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
-X1_DM_Med,X1_DM_MED,X1,Treating diabetes with insulin or oral hypglycemic agents? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
+X1_DM_Has,X1_DM_HAS,X1,Has diabetes mellitus? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_DM_SR,X1_DM_SR,X1,Diabetes mellitus self report? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_DM_Med,X1_DM_MED,X1,Treating diabetes with insulin or oral hypglycemic agents? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
 X1_GLUgt126,X1_GLUGT126,X1,Fasting glucose of >126 mg/dL?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_Glucose,X1_GLUCOSE,X1,"If X1_GLUgt126 is yes, then glucose value",DROP,,value recorded only above a threshold (censored)
 X1_DM_OthX,X1_DM_OTHX,X1,Diabetes mellitus other specify,DROP,,free text
-X1_Hyper_Has,X1_HYPER_HAS,X1,Has hypertension? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
-X1_Hyper_SR,X1_HYPER_SR,X1,Hypertension self report?,CLINICAL,binary,risk factor / decline report
-X1_Hyper_Med,X1_HYPER_MED,X1,Use of antihypertensive meds?,CLINICAL,binary,risk factor / decline report
+X1_Hyper_Has,X1_HYPER_HAS,X1,Has hypertension? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_Hyper_SR,X1_HYPER_SR,X1,Hypertension self report?,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_Hyper_Med,X1_HYPER_MED,X1,Use of antihypertensive meds?,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
 X1_Hyper_OthX,X1_HYPER_OTHX,X1,Hypertension other specify,DROP,,free text
-X1_SYSgt140,X1_SYSGT140,X1,Systolic blood pressure > 140 mmHg?,CLINICAL,binary,risk factor / decline report
+X1_SYSgt140,X1_SYSGT140,X1,Systolic blood pressure > 140 mmHg?,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
 X1_SYS,X1_SYS,X1,"If X1_SYSgt140 is yes, then systolic blood pressure value",DROP,,value recorded only above a threshold (censored)
 X1_DIAgt90,X1_DIAGT90,X1,Diastolic blood pressure > 90 mmHg? (discontinued Jan 2010),DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_DIA,X1_DIA,X1,"If X1_DIAgt90 is yes, then diastolic value (discontinued Jan 2010)",DROP,,value recorded only above a threshold (censored)
-X1_Obese_Is,X1_OBESE_IS,X1,Obesity?,CLINICAL,binary,risk factor / decline report
-X1_Obese_Ab,X1_OBESE_AB,X1,Abdominal Obesity?,CLINICAL,binary,risk factor / decline report
+X1_Obese_Is,X1_OBESE_IS,X1,Obesity?,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
+X1_Obese_Ab,X1_OBESE_AB,X1,Abdominal Obesity?,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
 X1_Waist,X1_WAIST,X1,"Waist circumference >102 men, > 88 women (discontinued Jan 2010)",DROP,,value recorded only above a threshold (censored)
 X1_BMI,X1_BMI,X1,"If X1_BMIgt30 yes, then BMI value",DROP,,value recorded only above a threshold (censored)
 X1_BMIgt30,X1_BMIGT30,X1,Body Mass Index >=30?,DROP,,derived from B1_BMI
 X1_Obese_OthX,X1_OBESE_OTHX,X1,Obesity other specify,DROP,,free text
-X1_Smoke_Ever,X1_SMOKE_EVER,X1,Smoking ever?,CLINICAL,binary,risk factor / decline report
+X1_Smoke_Ever,X1_SMOKE_EVER,X1,Smoking ever?,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals
 X1_Smoke_Cur,X1_SMOKE_CUR,X1,Smoking current?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_Atrial_SR,X1_ATRIAL_SR,X1,Self-reported history of Atrial Fibrillation?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_Arrhy_SR,X1_ARRHY_SR,X1,Self-reported history of other arrhythmias?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
