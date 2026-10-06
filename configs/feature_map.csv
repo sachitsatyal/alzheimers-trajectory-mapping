@@ -59,7 +59,7 @@ A3_SIBS,A3_SIBS,A3,Number of siblings,SOCIAL,numeric,family size / potential sup
 A3_SIBSDEM,A3_SIBSDEM,A3,Number of siblings w/dementia,GENOMIC,numeric,relatives with dementia: heritable risk
 A3_KIDS,A3_KIDS,A3,Number of children,SOCIAL,numeric,family size / potential support network
 A3_KIDSDEM,A3_KIDSDEM,A3,Number of children w/dementia,DROP,numeric,quality: only 26 patients (<10%)
-A41_PMEDS,A41_PMEDS,A41,Is the subject currently taking any prescription medications?,CLINICAL,binary,takes prescription / non-prescription medication
+A41_PMEDS,A41_PMEDS,A41,Is the subject currently taking any prescription medications?,DROP,binary,quality: codes contradict anti-dementia medication use; meaning unclear
 A41_PMA,A41_PMA,A41,Prescription A: Name,DROP,,"medication detail (names, doses, dates)"
 A41_PMAprev,A41_PMAPREV,A41,Prescription A: Check if previously captured,DROP,,"medication detail (names, doses, dates)"
 A41_pmARt,A41_PMART,A41,Prescription A: Route,DROP,,"medication detail (names, doses, dates)"
@@ -141,8 +141,8 @@ A41_NMDS,A41_NMDS,A41,Non-prescription D: Strength,DROP,,"medication detail (nam
 A41_NMDSU,A41_NMDSU,A41,Non-prescription D: Strength units,DROP,,"medication detail (names, doses, dates)"
 A41_NMDF,A41_NMDF,A41,Non-prescription D: Frequency #  doses,DROP,,"medication detail (names, doses, dates)"
 A41_NMDFU,A41_NMDFU,A41,Non-prescription D: Frequency units,DROP,,"medication detail (names, doses, dates)"
-A42_VitENow,A42_VITENOW,A42,Taken vitamin E ever?,CLINICAL,binary_12,vitamin E use (note: codebook descriptions of Now/Ever look swapped)
-A42_VitEEver,A42_VITEEVER,A42,Taking vitamin E now?,CLINICAL,binary_12,vitamin E use (note: codebook descriptions of Now/Ever look swapped)
+A42_VitENow,A42_VITENOW,A42,Taken vitamin E ever?,CLINICAL,binary,vitamin E use (note: codebook descriptions of Now/Ever look swapped)
+A42_VitEEver,A42_VITEEVER,A42,Taking vitamin E now?,CLINICAL,binary,vitamin E use (note: codebook descriptions of Now/Ever look swapped)
 A42_VEA,A42_VEA,A42,Vitamin E Hx A: Name,DROP,,medication detail
 A42_VEAprev,A42_VEAPREV,A42,Vitamin E Hx A: Check if previously captured,DROP,,medication detail
 A42_VEARt,A42_VEART,A42,Vitamin E Hx A: Route,DROP,,medication detail
@@ -371,14 +371,14 @@ A5_TIA5YR,A5_TIA5YR,A5,Year TIA occurred,DROP,,free text or event year
 A5_TIA6YR,A5_TIA6YR,A5,Year TIA occurred,DROP,,free text or event year
 A5_CBOTHR,A5_CBOTHR,A5,Cerebrovascular disease: Other,CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
 A5_CBOTHRX,A5_CBOTHRX,A5,"cerebrovascular disease: Other, specify",DROP,,free text or event year
-A5_PD,A5_PD,A5,Parkinsonian features: Parkinson's,CLINICAL,binary,medical history yes/no
+A5_PD,A5_PD,A5,Parkinsonian features: Parkinson's,DROP,binary,combined into ANY_PARKINSONISM
 A5_PDYR,A5_PDYR,A5,Parkinsonian features: Parkinson's (year diagnosed),DROP,,free text or event year
-A5_PDOTHR,A5_PDOTHR,A5,Parkinsonian features: Other Parkinsonism disorder,CLINICAL,binary,medical history yes/no
+A5_PDOTHR,A5_PDOTHR,A5,Parkinsonian features: Other Parkinsonism disorder,DROP,binary,combined into ANY_PARKINSONISM
 A5_PDOTHRYR,A5_PDOTHRYR,A5,Parkinsonian features: Other Parkinsonism disorder (year diagnosed),DROP,,free text or event year
 A5_SEIZURES,A5_SEIZURES,A5,Seizures,DROP,ever_present,quality: only 81 patients (<10%)
 A5_TRAUMBRF,A5_TRAUMBRF,A5,Brain trauma - brief unconsciousness (<5 minutes),CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
 A5_TRAUMEXT,A5_TRAUMEXT,A5,Brain trauma - extended unconsciousness (>=5 minutes),CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
-A5_TRAUMCHR,A5_TRAUMCHR,A5,Brain trauma - chronic deficit or dysfunction,CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
+A5_TRAUMCHR,A5_TRAUMCHR,A5,Brain trauma - chronic deficit or dysfunction,DROP,ever_present,quality: fewer than 30 patients with the rare value
 A5_NCOTHR,A5_NCOTHR,A5,"Other neurologic conditions, other",CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
 A5_NCOTHRX,A5_NCOTHRX,A5,"Other neurologic conditions, other - specify",DROP,,free text or event year
 A5_HYPERTEN,A5_HYPERTEN,A5,Hypertension,CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
@@ -398,7 +398,7 @@ A5_TOBAC100,A5_TOBAC100,A5,"Substance abuse tobacco, 100 lifetime cigarettes",CL
 A5_SMOKYRS,A5_SMOKYRS,A5,Total years smoked,CLINICAL,numeric,smoking exposure
 A5_PACKSPER,A5_PACKSPER,A5,Average # packs per day smoked,CLINICAL,numeric,smoking exposure
 A5_QUITSMOK,A5_QUITSMOK,A5,Age quit smoking,DROP,,conditional on quitting; sparse
-A5_ABUSOTHR,A5_ABUSOTHR,A5,Other abused substances,CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
+A5_ABUSOTHR,A5_ABUSOTHR,A5,Other abused substances,DROP,ever_present,quality: fewer than 30 patients with the rare value
 A5_ABUSX,A5_ABUSX,A5,Name of other abused substances,DROP,,free text or event year
 A5_PSYCDIS,A5_PSYCDIS,A5,Psychiatric Disorders,CLINICAL,ever_present,"history item: 0 absent, 1 active, 2 remote -> any history (TIA uses 8 = active)"
 A5_PSYCDISX,A5_PSYCDISX,A5,Psychiatric Disorders Specify,DROP,,free text or event year
@@ -590,49 +590,49 @@ D1_POSSAD,D1_POSSAD,D1,DX Possible AD (NINCDS/ADRDA),CLINICAL,binary,consensus d
 D1_POSSADIF,D1_POSSADIF,D1,"DX Possible AD, primary or contributing",DROP,,primary/contributing detail or text
 D1_DLB,D1_DLB,D1,DX Dementia with Lewy bodies,CLINICAL,binary,consensus diagnosis at visit t
 D1_DLBIF,D1_DLBIF,D1,"DX Dementia with Lewy bodies, primary or contributing",DROP,,primary/contributing detail or text
-D1_VASC,D1_VASC,D1,DX Probable Vascular dementia (NINDS/AIREN),CLINICAL,binary,consensus diagnosis at visit t
+D1_VASC,D1_VASC,D1,DX Probable Vascular dementia (NINDS/AIREN),DROP,binary,combined into D1_ANY_VASC
 D1_VASCIF,D1_VASCIF,D1,"DX Probable Vascular dementia (NINDS/AIREN), primary or contributing",DROP,,primary/contributing detail or text
-D1_POS_VASC,D1_POS_VASC,D1,DX Possible vascular dementia (NINDS/AIREN),CLINICAL,binary,consensus diagnosis at visit t
+D1_POS_VASC,D1_POS_VASC,D1,DX Possible vascular dementia (NINDS/AIREN),DROP,binary,combined into D1_ANY_VASC
 D1_POS_VASCIF,D1_POS_VASCIF,D1,"DX Possible vascular dementia (NINDS/AIREN), primary or contributing",DROP,,primary/contributing detail or text
-D1_ALCDEM,D1_ALCDEM,D1,DX Alcohol-related dementia,CLINICAL,binary,consensus diagnosis at visit t
+D1_ALCDEM,D1_ALCDEM,D1,DX Alcohol-related dementia,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_ALCDEMIF,D1_ALCDEMIF,D1,"DX Alcohol-related dementia, primary or contributing",DROP,,primary/contributing detail or text
 D1_DEMUN,D1_DEMUN,D1,DX Dementia of undetermined etiology,CLINICAL,binary,consensus diagnosis at visit t
 D1_DEMUNIF,D1_DEMUNIF,D1,"DX Dementia of undetermined etiology, primary or contributing",DROP,,primary/contributing detail or text
-D1_FTD,D1_FTD,D1,DX Frontotemporal dementia,CLINICAL,binary,consensus diagnosis at visit t
+D1_FTD,D1_FTD,D1,DX Frontotemporal dementia,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_FTDIF,D1_FTDIF,D1,"DX Frontotemporal dementia, primary or contributing",DROP,,primary/contributing detail or text
-D1_PPAPH,D1_PPAPH,D1,DX Primary progressive aphasia,CLINICAL,binary,consensus diagnosis at visit t
+D1_PPAPH,D1_PPAPH,D1,DX Primary progressive aphasia,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_PPAPHIF,D1_PPAPHIF,D1,"DX Primary progressive aphasia, primary or contributing",DROP,,primary/contributing detail or text
 D1_PNAPH,D1_PNAPH,D1,DX Progressive nonfluent aphasia,DROP,binary,quality: only 6 patients (<10%)
 D1_SEMDEMAN,D1_SEMDEMAN,D1,DX Semantic dementia - anomia plus word comprehension,DROP,binary,quality: only 6 patients (<10%)
 D1_SEMDEMAG,D1_SEMDEMAG,D1,DX Semantic dementia - agnostic variant,DROP,binary,quality: only 6 patients (<10%)
 D1_PPAOTHR,D1_PPAOTHR,D1,"DX Other (logopenic, anomic, transcortical, word deafness, syntactic comprehension, motor speech disorder, etc)",DROP,binary,quality: only 6 patients (<10%)
-D1_PSP,D1_PSP,D1,DX Progressive supranuclear palsy,CLINICAL,binary,consensus diagnosis at visit t
+D1_PSP,D1_PSP,D1,DX Progressive supranuclear palsy,DROP,binary,quality: always 0
 D1_PSPIF,D1_PSPIF,D1,"DX Progressive supranuclear palsy, primary or contributing",DROP,,primary/contributing detail or text
-D1_CORT,D1_CORT,D1,DX Corticobasal degeneration,CLINICAL,binary,consensus diagnosis at visit t
+D1_CORT,D1_CORT,D1,DX Corticobasal degeneration,DROP,binary,quality: always 0
 D1_CORTIF,D1_CORTIF,D1,"DX Corticobasal degeneration, primary or contributing",DROP,,primary/contributing detail or text
-D1_HUNT,D1_HUNT,D1,DX Huntington's disease,CLINICAL,binary,consensus diagnosis at visit t
+D1_HUNT,D1_HUNT,D1,DX Huntington's disease,DROP,binary,quality: always 0
 D1_HUNTIF,D1_HUNTIF,D1,"DX Huntington's disease, primary or contributing",DROP,,primary/contributing detail or text
-D1_PRION,D1_PRION,D1,DX Prion Disease,CLINICAL,binary,consensus diagnosis at visit t
+D1_PRION,D1_PRION,D1,DX Prion Disease,DROP,binary,quality: always 0
 D1_PRIONIF,D1_PRIONIF,D1,"DX Prion Disease, primary or contributing",DROP,,primary/contributing detail or text
-D1_MEDS,D1_MEDS,D1,DX Cognitive dysfunction from medications,CLINICAL,binary,consensus diagnosis at visit t
+D1_MEDS,D1_MEDS,D1,DX Cognitive dysfunction from medications,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_MEDSIF,D1_MEDSIF,D1,"DX Cognitive dysfunction from medications, primary or contributing",DROP,,primary/contributing detail or text
 D1_DYSILL,D1_DYSILL,D1,DX Cognitive dysfunction from medical illnesses,CLINICAL,binary,consensus diagnosis at visit t
 D1_DYSILLIF,D1_DYSILLIF,D1,"DX Cognitive dysfunction from medical illnesses, primary or contributing",DROP,,primary/contributing detail or text
 D1_DEP,D1_DEP,D1,DX Depression (DSM Major),CLINICAL,binary,consensus diagnosis at visit t
 D1_DEPIF,D1_DEPIF,D1,"DX Depression, primary or contributing",DROP,,primary/contributing detail or text
-D1_OTHPSY,D1_OTHPSY,D1,DX Other major psychiatric illness,CLINICAL,binary,consensus diagnosis at visit t
+D1_OTHPSY,D1_OTHPSY,D1,DX Other major psychiatric illness,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_OTHPSYIF,D1_OTHPSYIF,D1,"DX Other major psychiatric illness, primary or contributing",DROP,,primary/contributing detail or text
-D1_DOWNS,D1_DOWNS,D1,DX Down's syndrome,CLINICAL,binary,consensus diagnosis at visit t
+D1_DOWNS,D1_DOWNS,D1,DX Down's syndrome,DROP,binary,quality: always 0
 D1_DOWNSIF,D1_DOWNSIF,D1,"DX Down's syndrome, primary or contributing",DROP,,primary/contributing detail or text
-D1_PARK,D1_PARK,D1,DX Parkinson's disease,CLINICAL,binary,consensus diagnosis at visit t
+D1_PARK,D1_PARK,D1,DX Parkinson's disease,DROP,binary,combined into ANY_PARKINSONISM
 D1_PARKIF,D1_PARKIF,D1,"DX Parkinson's disease, primary or contributing",DROP,,primary/contributing detail or text
 D1_STROKE,D1_STROKE,D1,DX Stroke,CLINICAL,binary,consensus diagnosis at visit t
 D1_STROKEIF,D1_STROKEIF,D1,"DX Stroke, primary or contributing",DROP,,primary/contributing detail or text
-D1_HYCEPH,D1_HYCEPH,D1,DX Hydrocephalus,CLINICAL,binary,consensus diagnosis at visit t
+D1_HYCEPH,D1_HYCEPH,D1,DX Hydrocephalus,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_HYCEPHIF,D1_HYCEPHIF,D1,"DX Hydrocephalus, primary or contributing",DROP,,primary/contributing detail or text
 D1_BRNINJ,D1_BRNINJ,D1,DX Traumatic brain injury,CLINICAL,binary,consensus diagnosis at visit t
 D1_BRNINJIF,D1_BRNINJIF,D1,"DX Traumatic brain injury, primary or contributing",DROP,,primary/contributing detail or text
-D1_NEOP,D1_NEOP,D1,DX CNS neoplasm,CLINICAL,binary,consensus diagnosis at visit t
+D1_NEOP,D1_NEOP,D1,DX CNS neoplasm,DROP,binary,quality: fewer than 30 patients with the rare value
 D1_NEOPIF,D1_NEOPIF,D1,"DX CNS neoplasm, primary or contributing",DROP,,primary/contributing detail or text
 D1_COGOTH,D1_COGOTH,D1,DX Other,CLINICAL,binary,consensus diagnosis at visit t
 D1_COGOTHX,D1_COGOTHX,D1,DX Other Specify,DROP,,primary/contributing detail or text
@@ -681,7 +681,7 @@ I1_INRELTOX,I1_INRELTOX,I1,Informants other relationship to subject specify,DROP
 I1_INLIVWTH,I1_INLIVWTH,I1,Informant live with subject,CAREGIVER,binary,informant characteristic
 I1_INVISITS,I1_INVISITS,I1,"If no, frequency of in-person visits",CAREGIVER,numeric,informant education / contact frequency (contact asked only if not living together)
 I1_INCALLS,I1_INCALLS,I1,"If no, frequency of telephone contact",CAREGIVER,numeric,informant education / contact frequency (contact asked only if not living together)
-I1_INRELY,I1_INRELY,I1,Any question of informant's reliability,CAREGIVER,binary,informant characteristic
+I1_INRELY,I1_INRELY,I1,Any question of informant's reliability,DROP,binary,quality: fewer than 30 patients with the rare value
 P1_Pt_Type,P1_PT_TYPE,P1,Patient type at visit,DROP,,sample logistics / enrollment admin / redundant with D1
 P1_GDateEnrollX,P1_GDATEENROLLX,P1,Enrollment Date,DROP,,sample logistics / enrollment admin / redundant with D1
 P1_PtTypeDesc,P1_PTTYPEDESC,P1,Patient type at visit name,DROP,,sample logistics / enrollment admin / redundant with D1
@@ -774,14 +774,14 @@ X1_Hyperlip_Has,X1_HYPERLIP_HAS,X1,Has Hyperlipidemia? (discontinued Jan 2010),C
 X1_Hyperlip_SR,X1_HYPERLIP_SR,X1,Hyperlipidemia self report? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
 X1_Hyperlip_Med,X1_HYPERLIP_MED,X1,Use of cholesterol-lowering agents?(discontinued Jan 2010) ,CLINICAL,binary,risk factor / decline report
 X1_Hyperlip_OthX,X1_HYPERLIP_OTHX,X1,Hyperlipidemia other specify (discontinued Jan 2010),DROP,,free text
-X1_CHgt220,X1_CHGT220,X1,Total serum cholesterol >22mg/dL? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
+X1_CHgt220,X1_CHGT220,X1,Total serum cholesterol >22mg/dL? (discontinued Jan 2010),DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_Chol,X1_CHOL,X1,"If X1_CHgt220 is yes, then total serum level (discontinued Jan 2010)",DROP,,value recorded only above a threshold (censored)
-X1_LDLgt140,X1_LDLGT140,X1,LDL > 140Mg/dL? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
+X1_LDLgt140,X1_LDLGT140,X1,LDL > 140Mg/dL? (discontinued Jan 2010),DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_LDL,X1_LDL,X1,If X1_LDLgt140>140 then LDL value (discontinued Jan 2010),DROP,,value recorded only above a threshold (censored)
 X1_DM_Has,X1_DM_HAS,X1,Has diabetes mellitus? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
 X1_DM_SR,X1_DM_SR,X1,Diabetes mellitus self report? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
 X1_DM_Med,X1_DM_MED,X1,Treating diabetes with insulin or oral hypglycemic agents? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
-X1_GLUgt126,X1_GLUGT126,X1,Fasting glucose of >126 mg/dL?,CLINICAL,binary,risk factor / decline report
+X1_GLUgt126,X1_GLUGT126,X1,Fasting glucose of >126 mg/dL?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_Glucose,X1_GLUCOSE,X1,"If X1_GLUgt126 is yes, then glucose value",DROP,,value recorded only above a threshold (censored)
 X1_DM_OthX,X1_DM_OTHX,X1,Diabetes mellitus other specify,DROP,,free text
 X1_Hyper_Has,X1_HYPER_HAS,X1,Has hypertension? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
@@ -790,7 +790,7 @@ X1_Hyper_Med,X1_HYPER_MED,X1,Use of antihypertensive meds?,CLINICAL,binary,risk 
 X1_Hyper_OthX,X1_HYPER_OTHX,X1,Hypertension other specify,DROP,,free text
 X1_SYSgt140,X1_SYSGT140,X1,Systolic blood pressure > 140 mmHg?,CLINICAL,binary,risk factor / decline report
 X1_SYS,X1_SYS,X1,"If X1_SYSgt140 is yes, then systolic blood pressure value",DROP,,value recorded only above a threshold (censored)
-X1_DIAgt90,X1_DIAGT90,X1,Diastolic blood pressure > 90 mmHg? (discontinued Jan 2010),CLINICAL,binary,risk factor / decline report
+X1_DIAgt90,X1_DIAGT90,X1,Diastolic blood pressure > 90 mmHg? (discontinued Jan 2010),DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X1_DIA,X1_DIA,X1,"If X1_DIAgt90 is yes, then diastolic value (discontinued Jan 2010)",DROP,,value recorded only above a threshold (censored)
 X1_Obese_Is,X1_OBESE_IS,X1,Obesity?,CLINICAL,binary,risk factor / decline report
 X1_Obese_Ab,X1_OBESE_AB,X1,Abdominal Obesity?,CLINICAL,binary,risk factor / decline report
@@ -799,12 +799,12 @@ X1_BMI,X1_BMI,X1,"If X1_BMIgt30 yes, then BMI value",DROP,,value recorded only a
 X1_BMIgt30,X1_BMIGT30,X1,Body Mass Index >=30?,DROP,,derived from B1_BMI
 X1_Obese_OthX,X1_OBESE_OTHX,X1,Obesity other specify,DROP,,free text
 X1_Smoke_Ever,X1_SMOKE_EVER,X1,Smoking ever?,CLINICAL,binary,risk factor / decline report
-X1_Smoke_Cur,X1_SMOKE_CUR,X1,Smoking current?,CLINICAL,binary,risk factor / decline report
-X1_Atrial_SR,X1_ATRIAL_SR,X1,Self-reported history of Atrial Fibrillation?,CLINICAL,binary,risk factor / decline report
-X1_Arrhy_SR,X1_ARRHY_SR,X1,Self-reported history of other arrhythmias?,CLINICAL,binary,risk factor / decline report
-X1_MI_SR,X1_MI_SR,X1,Self-reported history of myocardial infarction?,CLINICAL,binary,risk factor / decline report
-X1_CHF_SR,X1_CHF_SR,X1,Self-reported history of congestive heart failure?,CLINICAL,binary,risk factor / decline report
-X1_Angina_SR,X1_ANGINA_SR,X1,Self-reported history of angina pectoris?,CLINICAL,binary,risk factor / decline report
+X1_Smoke_Cur,X1_SMOKE_CUR,X1,Smoking current?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
+X1_Atrial_SR,X1_ATRIAL_SR,X1,Self-reported history of Atrial Fibrillation?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
+X1_Arrhy_SR,X1_ARRHY_SR,X1,Self-reported history of other arrhythmias?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
+X1_MI_SR,X1_MI_SR,X1,Self-reported history of myocardial infarction?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
+X1_CHF_SR,X1_CHF_SR,X1,Self-reported history of congestive heart failure?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
+X1_Angina_SR,X1_ANGINA_SR,X1,Self-reported history of angina pectoris?,DROP,binary,"quality: rare, discontinued form; covered by A5 history / B1 vitals"
 X2_IdurY,X2_IDURY,X2,Informant's general estimate of symptoms (unprompted) years,CLINICAL,numeric,estimated symptom duration
 X2_IdurM,X2_IDURM,X2,Informant's general estimate of symptoms (unprompted) months,DROP,,months part of duration; years kept
 X2_MRdurY,X2_MRDURY,X2,Estimate of symptoms from review of records years,CLINICAL,numeric,estimated symptom duration
@@ -959,3 +959,5 @@ IADL,IADL,DERIVED,Built outcome IADL at visit t (outcomes.py),ABC_HISTORY,numeri
 NPIQ_SEV,NPIQ_SEV,DERIVED,Built outcome NPIQ_SEV at visit t (outcomes.py),ABC_HISTORY,numeric,outcome at visit t as predictor of visit t+1
 NPIQ_COUNT,NPIQ_COUNT,DERIVED,Built outcome NPIQ_COUNT at visit t (outcomes.py),ABC_HISTORY,numeric,outcome at visit t as predictor of visit t+1
 MMSE,MMSE,DERIVED,Built outcome MMSE at visit t (outcomes.py),ABC_HISTORY,numeric,outcome at visit t as predictor of visit t+1
+D1_ANY_VASC,,DERIVED,"Vascular dementia, probable or possible",CLINICAL,any_of:D1_VASC|D1_POS_VASC,combined: each alone had <30 patients
+ANY_PARKINSONISM,,DERIVED,Any parkinsonism (history or diagnosis),CLINICAL,any_of:A5_PD|A5_PDOTHR|D1_PARK,combined: rare items describing the same condition
