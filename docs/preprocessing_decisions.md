@@ -95,3 +95,5 @@ Codebook: TARCC_Codebook.xlsx (20200813 version). Data: TARCC_Main_Data.xlsx.
   forecast pairs 7,656 / 1,644 / 1,685 (total 10,985). Demented at baseline 36% / 35% / 37%.
 - Standardization and detection-limit fills fit on training visits only; missing -> 0 with mask 0.
 - Tensors: X, M (patients x 13 x 328), tau, dt_next, Y, MU (shifted outcomes), PI, S.
+- Sex balance verified without stratifying: women 62.3% / 59.4% / 61.3% (max gap 2.9 points < 3-point rule).
+  Note: A1_SEX is coded 1 = male, 0 = female (unlike I1_INSEX, 1 = male, 2 = female).
