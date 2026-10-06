@@ -1,0 +1,40 @@
+# Default configuration (paper Table I). Values marked TODO are placeholders
+# the paper leaves open ("[epochs]"); tune them on the validation split.
+data:
+  processed_dir: data/processed
+
+model:
+  d: 128                    # model width
+  encoder_layers: 3
+  encoder_heads: 4
+  encoder_ff: 256
+  dropout: 0.2
+  time2vec_k: 16            # components per time input
+  latent_dim: 32            # d_z
+  velocity_hidden: 128      # f_theta: 2 layers, tanh
+  ode_steps: 8              # fixed-step RK4
+  decoder_hidden: 64
+  decoder_dropout: 0.2
+  samples_train: 8          # S
+  samples_test: 100         # S_test
+  mixture_components: 4     # J; select from 2..6 on validation
+  kappa_min: 0.01
+  # encoder options
+  token_norm: true          # LayerNorm per category token (recommended)
+  category_dropout: 0.0     # hide whole categories in training; tune, e.g. 0.1
+  # ablation switches (paper Sec. III-K)
+  use_masks: true
+  use_time2vec: true
+  drop_categories: []       # e.g. [BIOMARKER]
+
+training:
+  seed: 42
+  batch_size: 32
+  lr: 3.0e-4
+  weight_decay: 1.0e-4
+  grad_clip: 1.0
+  max_epochs: 100
+  patience: 10
+  velocity_penalty: 1.0e-3  # lambda
+  prior_warmup_epochs: 10   # TODO: standard-normal prior before GMM init
+  kl_anneal_epochs: 20      # TODO: beta linear 0 -> 1
