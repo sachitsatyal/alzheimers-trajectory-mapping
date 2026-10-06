@@ -55,7 +55,7 @@ A1_REFERX,A1_REFERX,A1,"Referral source - specify, other",DROP,,free text or dat
 A3_MOMDEM,A3_MOMDEM,A3,Mother w/dementia?,GENOMIC,binary,parental dementia: heritable risk,,,
 A3_DADDEM,A3_DADDEM,A3,Father w/dementia?,GENOMIC,binary,parental dementia: heritable risk,,,
 A3_TWIN,A3_TWIN,A3,Is patient a twin?,DROP,,twin status: rare,,,
-A3_SIBS,A3_SIBS,A3,Number of siblings,SOCIAL,numeric,family size / potential support network,,,
+A3_SIBS,A3_SIBS,A3,Number of siblings,SOCIAL,numeric,family size / potential support network,,,zero_missing_before:2008
 A3_SIBSDEM,A3_SIBSDEM,A3,Number of siblings w/dementia,GENOMIC,numeric,relatives with dementia: heritable risk,,,
 A3_KIDS,A3_KIDS,A3,Number of children,SOCIAL,numeric,family size / potential support network,,,
 A3_KIDSDEM,A3_KIDSDEM,A3,Number of children w/dementia,DROP,numeric,quality: only 26 patients (<10%),,,
@@ -483,7 +483,7 @@ C1_TRAILB,C1_TRAILB,C1,Trails B total seconds to complete,DROP,,feature list: RE
 C1_TRAILBErr,C1_TRAILBERR,C1,Trails B total errors,DROP,,"version-specific, item-level or component score",,,
 C1_CLOX1,C1_CLOX1,C1,CLOX 1,DROP,,feature list: AUXILIARY,,,
 C1_CLOX2,C1_CLOX2,C1,CLOX 2,DROP,,feature list: AUXILIARY,,,
-C1_CLOCK,C1_CLOCK,C1,Clock Drawing,ABC_HISTORY,numeric,feature list: SECONDARY,,,
+C1_CLOCK,C1_CLOCK,C1,Clock Drawing,ABC_HISTORY,numeric,feature list: SECONDARY,,,zero_missing_from:2010
 C1_TAPS,C1_TAPS,C1,TAPS Score,DROP,,undocumented instrument (codebook gives no test name),,,
 C1_WMS3_LMEM1,C1_WMS3_LMEM1,C1,WMS-3 Logical Memory 1,DROP,,feature list: REDUNDANT,,,
 C1_WMS3_Story1A,C1_WMS3_STORY1A,C1,WMS-3 Logical Memory 1 Story A,DROP,,"version-specific, item-level or component score",,,
@@ -511,8 +511,8 @@ C1_BOSTON60,C1_BOSTON60,C1,Boston Naming 60,DROP,,feature list: REDUNDANT,,,
 C1_FAS_F,C1_FAS_F,C1,F words,DROP,,feature list: REDUNDANT,,,
 C1_FAS_A,C1_FAS_A,C1,A words,DROP,,feature list: REDUNDANT,,,
 C1_FAS_S,C1_FAS_S,C1,S words,DROP,,feature list: REDUNDANT,,,
-C1_Animal,C1_ANIMAL,C1,Animal Fluency Score,ABC_HISTORY,numeric,feature list: SECONDARY,,,
-C1_AMNART,C1_AMNART,C1,Total AMNART errors,DEMOGRAPHIC,numeric,premorbid ability (WAT replaces AMNART for Spanish speakers),,,
+C1_Animal,C1_ANIMAL,C1,Animal Fluency Score,ABC_HISTORY,numeric,feature list: SECONDARY,,,zero_missing_before:2010
+C1_AMNART,C1_AMNART,C1,Total AMNART errors,DEMOGRAPHIC,numeric,premorbid ability (WAT replaces AMNART for Spanish speakers),,,zero_missing_from:2011;carry_forward
 C1_WAT,C1_WAT,C1,Total WAT Correct. Instead of AMNART for Spanish only speakers,DEMOGRAPHIC,numeric,premorbid ability (WAT replaces AMNART for Spanish speakers),,,
 C1_VIQ_EST,C1_VIQ_EST,C1,"Calculation: 118.2 - (.89*AMNART errors) + (.64*years of education). ""0"" if WAT used (see C1_WAT).",DROP,,feature list: COVARIATE,,,
 C1_WMS3_VR_A,C1_WMS3_VR_A,C1,WMS-3 VR 1 Figure A,DROP,,"version-specific, item-level or component score",,,
@@ -551,8 +551,8 @@ C1_SS_WMSR_LM_I,C1_SS_WMSR_LM_I,C1,Scaled Score WMS-R Learning Memory 1,DROP,,"v
 C1_SS_Combined_LM_II,C1_SS_COMBINED_LM_II,C1,Scaled Score Combined Learning Memory 2,ABC_HISTORY,numeric,feature list: PRIMARY,,,
 C1_SS_WMS3_LM_II,C1_SS_WMS3_LM_II,C1,Scaled Score WMS-3 Learning Memory 2,DROP,,"version-specific, item-level or component score",,,
 C1_SS_WMSR_LM_II,C1_SS_WMSR_LM_II,C1,Scaled Score WMS-R Learning Memory 2,DROP,,"version-specific, item-level or component score",,,
-C1_SS_Combined_VR_I,C1_SS_COMBINED_VR_I,C1,Scaled Score Combined Visual Reproduction 1,ABC_HISTORY,numeric,combined scaled score (version-harmonized),,,
-C1_SS_Combined_VR_II,C1_SS_COMBINED_VR_II,C1,Scaled Score Combined Visual Reproduction 2,ABC_HISTORY,numeric,combined scaled score (version-harmonized),,,
+C1_SS_Combined_VR_I,C1_SS_COMBINED_VR_I,C1,Scaled Score Combined Visual Reproduction 1,ABC_HISTORY,numeric,combined scaled score (version-harmonized),,,zero_missing_before:2008
+C1_SS_Combined_VR_II,C1_SS_COMBINED_VR_II,C1,Scaled Score Combined Visual Reproduction 2,ABC_HISTORY,numeric,combined scaled score (version-harmonized),,,zero_missing_before:2008
 C1_SS_Boston60,C1_SS_BOSTON60,C1,Scaled Score Boston 60 Item,ABC_HISTORY,numeric,feature list: PRIMARY,,,
 C1_SS_Cowat,C1_SS_COWAT,C1,Scaled Score Controlled Oral Word Association Test,ABC_HISTORY,numeric,feature list: PRIMARY,,,
 C1_SS_Amnart,C1_SS_AMNART,C1,Scaled Score AMNART,DROP,,"version-specific, item-level or component score",,,
@@ -765,11 +765,11 @@ Proteomics_VEGF- angio plate,PROTEO_VEGF_ANGIO_PLATE,PROTEOMICS,Vascular endothe
 Proteomics_VEGF- cyto plate,PROTEO_VEGF_CYTO_PLATE,PROTEOMICS,Vascular endothelial growth factor cyto plate,BIOMARKER,carry_forward,"blood biomarker; carried forward from assay visit, never backward",,,
 Proteomics_VEGF-C,PROTEO_VEGF_C,PROTEOMICS,Vascular endothelial growth factor C,BIOMARKER,carry_forward,"blood biomarker; carried forward from assay visit, never backward",,,
 Proteomics_VEGF-D,PROTEO_VEGF_D,PROTEOMICS,Vascular endothelial growth factor D,BIOMARKER,carry_forward,"blood biomarker; carried forward from assay visit, never backward",,,
-X1_DeclineSub,X1_DECLINESUB,X1,Subject reports decline in memory?,ABC_HISTORY,binary,subject / clinician report of memory decline: cognitive symptom,,,
-X1_DeclineCl,X1_DECLINECL,X1,Clinician believes there is a decline in memory?,ABC_HISTORY,binary,subject / clinician report of memory decline: cognitive symptom,,,
+X1_DeclineSub,X1_DECLINESUB,X1,Subject reports decline in memory?,ABC_HISTORY,binary,subject / clinician report of memory decline: cognitive symptom,,,zero_missing_from:2013
+X1_DeclineCl,X1_DECLINECL,X1,Clinician believes there is a decline in memory?,ABC_HISTORY,binary,subject / clinician report of memory decline: cognitive symptom,,,zero_missing_from:2013
 X1_DeclineAgePhy,X1_DECLINEAGEPHY,X1,Age decline began (based upon clinician assessment). Replaced by form X2 in Feb 2008,DROP,years_since_onset,quality: 0 (not recorded) at 97% of visits,,,
 X1_DeclineAge,X1_DECLINEAGE,X1,Age decline began (based upon caregiver's assessment),CLINICAL,years_since_onset,age decline began -> years since onset at visit,0,,
-X1_PhyEstDur,X1_PHYESTDUR,X1,Physician's estimate of duration (in years). Replaced by form X2 in Feb 2008,CLINICAL,numeric,estimated symptom duration,,,
+X1_PhyEstDur,X1_PHYESTDUR,X1,Physician's estimate of duration (in years). Replaced by form X2 in Feb 2008,DROP,numeric,quality: real values only in 2008-2009; zero filler otherwise,,,
 X1_Hyperlip_Has,X1_HYPERLIP_HAS,X1,Has Hyperlipidemia? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals,,,
 X1_Hyperlip_SR,X1_HYPERLIP_SR,X1,Hyperlipidemia self report? (discontinued Jan 2010),DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals,,,
 X1_Hyperlip_Med,X1_HYPERLIP_MED,X1,Use of cholesterol-lowering agents?(discontinued Jan 2010) ,DROP,binary,quality: discontinued form; covered by A5 history / B1 vitals,,,
