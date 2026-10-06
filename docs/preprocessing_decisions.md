@@ -57,3 +57,26 @@ Codebook: TARCC_Codebook.xlsx (20200813 version). Data: TARCC_Main_Data.xlsx.
   set to missing when CDR global < 2 (15 visits, implausible).
 - Predictor side: forms F1, F2, B5 at partial visits are marked unobserved in the mask m_t.
 - Verified on full data: missing PSMS 523, IADL 2,483, NPIQ_SEV 527, NPIQ_COUNT 524, MMSE 15; all values in range.
+
+## Predictor quality audit (src/.../quality.py; decisions in configs/feature_map.csv)
+- 363 mapped predictors audited for coverage, range, near-constancy, codes, and by-year patterns.
+- Low coverage (<10% of patients) or empty: 21 dropped. The 7 empty Proteomics markers carry a
+  missing code (0 / -777777) at every visit: never successfully measured.
+- Data fill every non-assay visit with codes, not blanks; codes are converted before any statistic.
+- Near-constant: kept if >=30 patients have the rare value; otherwise dropped (incl. 5 diagnoses always 0).
+  Combined: D1_ANY_VASC (VASC + POS_VASC); ANY_PARKINSONISM (A5_PD + A5_PDOTHR + D1_PARK).
+- Codebook coding does not always match the data:
+  A42 vitamin E stored 0/1 (codebook says 1/2; Now/Ever descriptions swapped);
+  A43 confirmed 1 = yes via diagnosis (1 in 3,819 demented vs 433 normal); 0 = form not done.
+  A41_PMEDS dropped: codes contradict anti-dementia medication use.
+- Binary conversion: binary {0,1}; binary_12 {1 -> 1, 2 -> 0}; ever_present {0 -> 0; 1, 2, 8 -> 1};
+  any other value -> missing.
+- X1 risk-factor form dropped: discontinued; duplicated by A5 history and B1 vitals.
+  X1 decline reports kept with zeros from 2013 onward set to missing.
+- Informant form (I1) not done at 636 visits (relationship = 0): all I1 predictors masked there.
+- Logical fills: packs/day = 0 for never-smokers (TOBAC100 = 0, incl. code 8 = N/A, 4,919 visits);
+  informant contact frequency = daily when living with the patient (8,855 visits).
+- Tests introduced or stopped, zeros on the inactive side set to missing:
+  Clock from 2010; AMNART from 2011 (then carried forward: premorbid, stable);
+  Animal fluency before 2010; VR I/II, siblings in 2007; X1 decline reports from 2013.
+- Transition years are treated as inactive: loses a few real zeros, never admits filler.
