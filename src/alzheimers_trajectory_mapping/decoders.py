@@ -24,6 +24,12 @@ cross-domain influence still has to travel through the coupled latent dynamics.
 Motivation: without the anchor, all models lost to LOCF on function and
 behavior, even with no KL penalty (z is too narrow a path to carry exact scores).
 
+decoder_reads_shared (default true): if false, each decoder reads ONLY its own
+block z_D. The shared block then influences outcomes only through the dynamics
+(f_D(z_D, z_S)), i.e. as a common driver of change. Motivation: in kl001 the
+behavior and cognition blocks were unused (shuffling them changed CRPS < 0.5%)
+because the shared block, read by every decoder, carried everything.
+
 Switches: decoder_exclude_categories (default [ABC_HISTORY]);
 decoder_uses_history (default false; true re-opens a direct path from h~);
 decoder_anchor (default true).
@@ -85,11 +91,12 @@ class DomainDecoders(nn.Module):
         self.extra_dim = cfg.get("decoder_extra_dim", 0)
         self.kappa_min = cfg["kappa_min"]
         self.anchor = cfg.get("decoder_anchor", True)
+        self.reads_shared = cfg.get("decoder_reads_shared", True)
 
         self.attention = TokenAttention()
         self.queries, self.heads = nn.ModuleDict(), nn.ModuleDict()
         for D in self.domains:
-            u_dim = blocks[D] + blocks[SHARED]
+            u_dim = blocks[D] + (blocks[SHARED] if self.reads_shared else 0)
             in_dim = (u_dim + d + (d if self.uses_history else 0) + self.extra_dim
                       + (3 * len(self.index[D]) if self.anchor else 0))
             self.queries[D] = nn.Linear(u_dim, d)
@@ -98,6 +105,8 @@ class DomainDecoders(nn.Module):
                 nn.Dropout(cfg["decoder_dropout"]), nn.Linear(cfg["decoder_hidden"], 2 * len(self.index[D])))
 
     def latent_input(self, z, D):
+        if not self.reads_shared:
+            return z[..., self.slices[D]]
         return torch.cat([z[..., self.slices[D]], z[..., self.slices[SHARED]]], dim=-1)
 
     def forward(self, z_delta, tokens, h_tilde, extra=None, anchor=None):

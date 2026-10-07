@@ -107,3 +107,11 @@ def test_anchor_never_sees_the_future():
     p1 = dec(z, tokens, h, anchor=last_observed(Y, MU, t_abs))["p"]
     p2 = dec(z, tokens, h, anchor=last_observed(Y2, MU, t_abs))["p"]
     assert torch.allclose(p1[..., :3, :], p2[..., :3, :])  # forecasts made at visits 1-3 unchanged
+
+
+def test_decoders_can_ignore_shared_block():
+    z, tokens, h = inputs()
+    dec = DomainDecoders(META, CATS, {**CFG, "decoder_reads_shared": False}, BLOCKS)
+    z2 = z.clone()
+    z2[..., 0:2] += 5.0  # shared block only
+    assert torch.allclose(dec(z, tokens, h)["p"], dec(z2, tokens, h)["p"])

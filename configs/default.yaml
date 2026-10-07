@@ -10,7 +10,7 @@ model:
   encoder_ff: 256
   dropout: 0.2
   time2vec_k: 16            # components per time input
-  latent_blocks: {S: 8, A: 8, B: 8, C: 8}   # shared severity + function, behavior, cognition
+  latent_blocks: {S: 4, A: 8, B: 8, C: 8}   # shared severity + function, behavior, cognition
   coupling: true                             # false = no cross-domain terms (ablation)
   posterior_logvar_init: -2.0            # d_z
   velocity_hidden: 128      # f_theta: 2 layers, tanh
@@ -21,6 +21,7 @@ model:
   samples_test: 100         # S_test
   n_subtypes: 4             # J; select from 2..6 on validation
   subtype_embedding_dim: 16
+  decoder_reads_shared: false   # false = decoders read only their own block; S drives change via dynamics
   membership_hidden: 64
   kappa_min: 0.01
   # encoder options
