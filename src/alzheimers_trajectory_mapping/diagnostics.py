@@ -16,6 +16,16 @@ import torch
 from .data import make_loader
 from .evaluate import load_run, model_scores
 
+# Which ABC-history inputs belong to which domain (matched as name prefixes).
+# CDR boxes split by content; CDR global mixes domains and stays unassigned.
+DOMAIN_INPUTS = {
+    "A": ["OUT_PSMS", "OUT_IADL", "A1_INDEPEND", "C1_CDRCA", "C1_CDRHOB", "C1_CDRPER"],
+    "B": ["OUT_NPIQ", "C1_GDS"],
+    "C": ["OUT_MMSE", "C1_CDRMEM", "C1_CDROR", "C1_CDRJU", "C1_SS_", "C1_ANIMAL", "C1_CLOCK",
+          "C1_CERAD", "C1_TRAIL", "C1_BOSTON", "C1_COWAT", "C1_TOOIMPAIRED", "X1_DECLINE"],
+}
+
+
 
 def shuffle_block(sl, generator_seed=0):
     def perturb(z0):  # z0 (S, B, T, dz): permute patients within the batch for this block
@@ -42,3 +52,47 @@ def z_usage(run_dir, split="val", n_samples=32, device=None) -> pd.DataFrame:
     crps = pd.DataFrame(rows).T
     change = (crps / crps.loc["intact"] - 1.0) * 100
     return crps, change
+
+
+def domain_history_columns(meta: dict) -> tuple:
+    """Indices of each domain's ABC-history inputs, plus the unassigned column names."""
+    a, b = meta["category_blocks"]["ABC_HISTORY"]
+    columns = meta["feature_columns"]
+    assigned, unassigned = {D: [] for D in DOMAIN_INPUTS}, []
+    for i in range(a, b):
+        name = columns[i].upper()
+        owner = [D for D, prefixes in DOMAIN_INPUTS.items() if any(name.startswith(p) for p in prefixes)]
+        if owner:
+            assigned[owner[0]].append(i)
+        else:
+            unassigned.append(columns[i])
+    return assigned, unassigned
+
+
+def shuffle_inputs(indices, seed=0):
+    """Give each patient another patient's history for these input columns (values and masks)."""
+    def transform(batch):
+        g = torch.Generator(device="cpu").manual_seed(seed)
+        perm = torch.randperm(batch["X"].shape[0], generator=g).to(batch["X"].device)
+        out = dict(batch)
+        for key in ("X", "M"):
+            x = batch[key].clone()
+            x[..., indices] = batch[key][perm][..., indices]
+            out[key] = x
+        return out
+    return transform
+
+
+def history_influence(run_dir, split="val", n_samples=32, device=None):
+    """Granger-style ABC map: % CRPS increase of every outcome when one domain's
+    PAST scores are shuffled across patients. Off-diagonal entries = how much a
+    domain's history helps forecast the other domains (predictive influence)."""
+    model, cfg, meta, device = load_run(run_dir, device)
+    loader = make_loader(cfg["data"]["processed_dir"], split, cfg["training"]["batch_size"])
+    columns, _ = domain_history_columns(meta)
+    rows = {"intact": {k: v["CRPS"] for k, v in model_scores(model, loader, device, n_samples).items()}}
+    for D, idx in columns.items():
+        scores = model_scores(model, loader, device, n_samples, batch_transform=shuffle_inputs(idx))
+        rows[f"shuffle_history_{D}"] = {k: v["CRPS"] for k, v in scores.items()}
+    crps = pd.DataFrame(rows).T
+    return crps, (crps / crps.loc["intact"] - 1.0) * 100

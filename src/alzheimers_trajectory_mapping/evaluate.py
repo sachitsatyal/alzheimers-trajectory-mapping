@@ -128,14 +128,17 @@ def load_run(run_dir, device=None):
 
 
 @torch.no_grad()
-def model_scores(model, loader, device, n_samples=32, perturb=None, seed=0) -> dict:
-    """{outcome: aggregated metrics} for the model on every observed next-visit score."""
+def model_scores(model, loader, device, n_samples=32, perturb=None, seed=0, batch_transform=None) -> dict:
+    """{outcome: aggregated metrics} for the model on every observed next-visit score.
+    batch_transform: optional function applied to each batch's inputs (diagnostics)."""
     torch.manual_seed(seed)  # same posterior samples across compared settings
     names = model.decoders.outcomes
     pmf_all = {k: [] for k in names}
     y_all = {k: [] for k in names}
     for batch in loader:
         batch = {k: v.to(device) for k, v in batch.items()}
+        if batch_transform is not None:
+            batch = batch_transform(batch)
         pmfs, y_next, mu_next = model_pmfs(model, batch, n_samples, perturb)
         for k, name in enumerate(names):
             sel = mu_next[..., k] > 0
