@@ -33,6 +33,8 @@ for i, name in enumerate(args.names):
         print(within.round(2).to_string())
     print(f"\n{name}: sizes", (df["subtype"].value_counts(normalize=True).sort_index().round(3)).to_dict(),
           "| mean confidence", round(df["confidence"].mean(), 3))
+    compact = ["share", "baseline_agrees", "dementia_%", "normal_%"] + [c for c in summary.columns if c.endswith("/yr") or c.endswith("_per_year")]
+    print(summary[compact].round(2).to_string())
 
 print("\n=== assignment agreement between runs (adjusted Rand index) ===")
 for a, b in itertools.combinations(args.names, 2):
