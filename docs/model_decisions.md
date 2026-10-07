@@ -108,3 +108,31 @@ MMSE | 1.89 | 5.12 |
 - base_v1 (collapsed) and coupled_fb (free bits) lose to LOCF on PSMS, IADL, NPI-Q;
   only MMSE beats LOCF (1.74). Cause: z is the only path for current scores and is a
   noisy bottleneck. Candidate fix: anchor each decoder on its own domain's current score.
+
+## ABC history-influence map (ownS4, 3 seeds; scripts/abc_map.py)
+   % CRPS increase when one domain's history is shuffled across patients (mean ± sd):
+   | history \ forecast | PSMS | IADL | NPIQ_SEV | NPIQ_COUNT | MMSE |
+   | A function  | 3.0±2.2 | 8.1±3.5 | 0.9±0.2 | 1.1±0.2 | 1.0±0.4 |
+   | B behavior  | ~0 | ~0 | 25.2±3.9 | 16.0±1.8 | 0.5±0.5 |
+   | C cognition | 8.8±0.8 | 18.2±3.6 | 2.5±0.8 | 3.5±1.1 | 16.8±2.3 |
+   - Cognition -> function strongest (exceeds function's own history beyond the anchor);
+     cognition -> behavior weak; function -> others marginal; behavior -> none.
+   - Learned within-gap coupling W ~ 0: influence acts via inference of each domain's state
+     from the full history. Interpretation: unique predictive (Granger-style) influence,
+     not causation; conservative where information is shared with other inputs.
+   - To do: robustness (no_cdr, scores_only), retrain-based confirmation of C -> A,
+     item-level behavior (apathy).
+   - Robustness: without CDR boxes, C->A unchanged (PSMS 8.1±0.4, IADL 18.0±3.3); C->B
+  disappears (0.7/0.8%: it came from CDR ratings, not reported). MMSE alone carries ~1/4
+  of C->A (2.5±1.1 / 4.0±0.8): detailed neuropsych profile predicts function beyond MMSE.
+
+
+## Choice of J (subtypes), 3 seeds each
+   - CRPS equivalent for J = 2, 3, 4 (differences within seed noise).
+   - J = 3 recovers the same three subtypes in every seed: stable (33-47%), steady decliner
+     (32-47%, behavior flat), behavior-escalating decliner (14-24%, NPI-Q severity +1.0 to
+     +1.6/yr, fastest functional and cognitive decline), also within MCI, dementia, normal.
+   - J = 2 merges the behavior-escalating group into general decliners; J = 4 splits steady
+     decliners inconsistently across seeds.
+   - ARI 0.41-0.45 with consistent profiles: soft phenotypes on a continuum; final
+     assignments via consensus across seeds; report probabilities.

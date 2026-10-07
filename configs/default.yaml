@@ -19,7 +19,7 @@ model:
   decoder_dropout: 0.2
   samples_train: 8          # S
   samples_test: 100         # S_test
-  n_subtypes: 4             # J; select from 2..6 on validation
+  n_subtypes: 3             # J; select from 2..6 on validation
   subtype_embedding_dim: 16
   decoder_reads_shared: false   # false = decoders read only their own block; S drives change via dynamics
   membership_hidden: 64
