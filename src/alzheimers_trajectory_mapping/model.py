@@ -35,10 +35,14 @@ class ABCModel(nn.Module):
         self.decoders = DomainDecoders(meta, self.encoder.categories,
                                        {**cfg, "decoder_extra_dim": extra}, blocks)
 
-    def forward(self, batch, n_samples: int):
+    def forward(self, batch, n_samples: int, perturb=None):
+        """perturb: optional function applied to the posterior samples z0 before the
+        dynamics (used by diagnostics, e.g. shuffling one latent block across patients)."""
         enc = self.encoder(batch)
         h_tilde = self.history(enc["h"], batch["PI"])
         mu, logvar, z0 = self.posterior(h_tilde, n_samples)
+        if perturb is not None:
+            z0 = perturb(z0)
         embeddings = self.subtypes.embedding.weight
         z_delta = self.dynamics(z0, batch["dt_next"], embeddings)
         extra = None

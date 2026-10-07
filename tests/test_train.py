@@ -44,6 +44,7 @@ def test_schedules():
     beta, temp = schedules(2, tcfg)
     assert abs(beta - 0.2) < 1e-9 and abs(temp - 3.0) < 1e-9
     assert schedules(20, tcfg) == (1.0, 1.0)
+    assert schedules(20, {**tcfg, "kl_max": 0.1}) == (0.1, 1.0)
 
 
 def test_config_overrides(tmp_path):

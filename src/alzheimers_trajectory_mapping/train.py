@@ -45,8 +45,9 @@ def set_seed(seed: int):
 
 
 def schedules(epoch: int, tcfg: dict):
-    """KL weight and subtype temperature for this epoch (epochs counted from 0)."""
-    beta = min(1.0, epoch / max(1, tcfg["kl_anneal_epochs"]))
+    """KL weight and subtype temperature for this epoch (epochs counted from 0).
+    beta rises linearly to kl_max (default 1) over kl_anneal_epochs."""
+    beta = tcfg.get("kl_max", 1.0) * min(1.0, epoch / max(1, tcfg["kl_anneal_epochs"]))
     frac = min(1.0, epoch / max(1, tcfg["subtype_temperature_epochs"]))
     temperature = tcfg["subtype_temperature_start"] + frac * (1.0 - tcfg["subtype_temperature_start"])
     return beta, temperature
@@ -57,14 +58,14 @@ def to_device(batch, device):
 
 
 @torch.no_grad()
-def evaluate(model, loader, device, n_samples, free_bits=0.0, coupling_penalty=1e-3) -> dict:
+def evaluate(model, loader, device, n_samples, free_bits=0.0, coupling_penalty=1e-3, beta=1.0) -> dict:
     model.eval()
     totals, n_batches = {}, 0
     abs_err, counts = 0.0, 0.0
     for batch in loader:
         batch = to_device(batch, device)
         out = model(batch, n_samples)
-        _, stats = compute_loss(model, batch, out, beta=1.0, temperature=1.0, free_bits=free_bits,
+        _, stats = compute_loss(model, batch, out, beta=beta, temperature=1.0, free_bits=free_bits,
                                 coupling_penalty=coupling_penalty)
         for k in ("loss", "nll", "kl_per_position", "active_units", "subtype_divergence"):
             totals[k] = totals.get(k, 0.0) + stats[k]
@@ -130,7 +131,7 @@ def train(cfg: dict, run_dir, device=None, verbose=True) -> dict:
             n += 1
 
         val = evaluate(model, val_loader, device, mcfg["samples_train"], tcfg.get("free_bits", 0.0),
-                       tcfg.get("coupling_penalty", 1e-3))
+                       tcfg.get("coupling_penalty", 1e-3), beta=tcfg.get("kl_max", 1.0))
         record = {"interaction_map": model.dynamics.interaction_map(), "epoch": epoch, "beta": beta, "temperature": temperature, "seconds": round(time.time() - start, 1),
                   "train": {k: v / n for k, v in sums.items()},
                   "train_subtype_sizes": (sizes / n).round(3).tolist(), "val": val}
@@ -138,13 +139,14 @@ def train(cfg: dict, run_dir, device=None, verbose=True) -> dict:
         with log_path.open("a") as f:
             f.write(json.dumps(record) + "\n")
 
-        # Early stopping only once the KL weight has reached 1 (earlier objectives are not comparable).
-        improved = beta >= 1.0 and val["loss"] < best
+        # Early stopping only once the KL weight has reached kl_max (earlier objectives are not comparable).
+        annealed = epoch >= tcfg["kl_anneal_epochs"]
+        improved = annealed and val["loss"] < best
         if improved:
             best, best_epoch, waited = val["loss"], epoch, 0
             torch.save({"model": model.state_dict(), "config": cfg, "epoch": epoch, "meta": meta},
                        run_dir / "best.pt")
-        elif beta >= 1.0:
+        elif annealed:
             waited += 1
         if verbose:
             mae = " ".join(f"{k}={v:.2f}" for k, v in val["mae"].items())

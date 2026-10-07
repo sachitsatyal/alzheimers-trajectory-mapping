@@ -95,10 +95,10 @@ def locf_pmf(anchor, has, delta_pmf, marginal_pmf, n):
 # ---------- the model's predictive distribution (torch) ----------
 
 @torch.no_grad()
-def model_pmfs(model, batch, n_samples):
+def model_pmfs(model, batch, n_samples, perturb=None):
     """Predictive distribution per outcome at every position: list of (B, T, n_k + 1),
     a mixture over posterior samples and subtypes (weighted by the ONLINE posterior)."""
-    out = model(batch, n_samples)
+    out = model(batch, n_samples, perturb)
     y_next, mu_next, _ = next_visit_targets(batch)
     ll = model.decoders.log_likelihood(y_next, out["p"], out["kappa"]) * mu_next
     transition = ll.mean(1).sum(-1).permute(1, 2, 0)                                # (B, T, J)
@@ -115,8 +115,8 @@ def model_pmfs(model, batch, n_samples):
     return pmfs, y_next, mu_next
 
 
-def evaluate_run(run_dir, split="val", n_samples=32, device=None) -> pd.DataFrame:
-    """Score a trained run's best checkpoint and the baselines on one split."""
+def load_run(run_dir, device=None):
+    """Best checkpoint of a run -> (model in eval mode, config, meta, device)."""
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     ckpt = torch.load(Path(run_dir) / "best.pt", map_location=device, weights_only=False)
     cfg, meta = ckpt["config"], ckpt["meta"]
@@ -124,6 +124,30 @@ def evaluate_run(run_dir, split="val", n_samples=32, device=None) -> pd.DataFram
     model = ABCModel(meta, cfg["model"]).to(device)
     model.load_state_dict(ckpt["model"])
     model.eval()
+    return model, cfg, meta, device
+
+
+@torch.no_grad()
+def model_scores(model, loader, device, n_samples=32, perturb=None, seed=0) -> dict:
+    """{outcome: aggregated metrics} for the model on every observed next-visit score."""
+    torch.manual_seed(seed)  # same posterior samples across compared settings
+    names = model.decoders.outcomes
+    pmf_all = {k: [] for k in names}
+    y_all = {k: [] for k in names}
+    for batch in loader:
+        batch = {k: v.to(device) for k, v in batch.items()}
+        pmfs, y_next, mu_next = model_pmfs(model, batch, n_samples, perturb)
+        for k, name in enumerate(names):
+            sel = mu_next[..., k] > 0
+            pmf_all[name].append(pmfs[k][sel].cpu().numpy())
+            y_all[name].append(y_next[..., k][sel].long().cpu().numpy())
+    return {name: aggregate(score_pmf(np.concatenate(pmf_all[name]), np.concatenate(y_all[name])))
+            for name in names}
+
+
+def evaluate_run(run_dir, split="val", n_samples=32, device=None) -> pd.DataFrame:
+    """Score a trained run's best checkpoint and the baselines on one split."""
+    model, cfg, meta, device = load_run(run_dir, device)
     data_dir = cfg["data"]["processed_dir"]
     names = list(meta["outcomes"])
     n = [int(meta["outcomes"][k]["n"]) for k in names]

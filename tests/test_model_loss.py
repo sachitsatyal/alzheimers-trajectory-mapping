@@ -97,3 +97,16 @@ def test_coupling_penalty_adds_to_loss():
     loss_on, stats = compute_loss(model, b, out, coupling_penalty=1.0)
     loss_off, _ = compute_loss(model, b, out, coupling_penalty=0.0)
     assert loss_on > loss_off and stats["coupling_total"] > 0
+
+
+def test_perturb_hook():
+    torch.manual_seed(0)
+    model = ABCModel(META, CFG).eval()
+    b = batch()
+    torch.manual_seed(1)
+    p1 = model(b, 2)["p"]
+    torch.manual_seed(1)
+    p2 = model(b, 2, perturb=lambda z: z)["p"]
+    torch.manual_seed(1)
+    p3 = model(b, 2, perturb=lambda z: z + 3.0)["p"]
+    assert torch.allclose(p1, p2) and not torch.allclose(p1, p3)

@@ -10,7 +10,9 @@ model:
   encoder_ff: 256
   dropout: 0.2
   time2vec_k: 16            # components per time input
-  latent_dim: 32            # d_z
+  latent_blocks: {S: 8, A: 8, B: 8, C: 8}   # shared severity + function, behavior, cognition
+  coupling: true                             # false = no cross-domain terms (ablation)
+  posterior_logvar_init: -2.0            # d_z
   velocity_hidden: 128      # f_theta: 2 layers, tanh
   ode_steps: 8              # fixed-step RK4
   decoder_hidden: 64
@@ -30,6 +32,7 @@ model:
   drop_categories: []       # e.g. [BIOMARKER]
   deterministic: false      # ablation: z = mu, no sampling, no KL
   dynamics: ode             # ode (paper) | sde (variant v) | none (ablation iii)
+  decoder_anchor: true      # forecast = change from last observed value (false = ablation)
 
 training:
   seed: 42
@@ -43,4 +46,6 @@ training:
   subtype_temperature_start: 5.0   # soft assignments early; anneal to 1
   subtype_temperature_epochs: 20
   kl_anneal_epochs: 20      # TODO: beta linear 0 -> 1
+  kl_max: 0.01
   free_bits: 0.0            # turn on (e.g. 0.05) if active_units collapses
+  coupling_penalty: 1.0e-3                   # group lasso on the ABC interaction map
