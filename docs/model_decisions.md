@@ -97,3 +97,14 @@ Choices are made on the validation split; the test split is used once, at the en
    - Free bits available (default 0); enable if active_units collapses.
    - Logged per step: active_units, subtype_sizes, subtype_divergence, nll_per_outcome,
      kl_per_position, velocity.
+
+## Baselines (validation split; scripts/baselines.py)
+| MAE | LOCF | train mean |
+| PSMS | 0.64 | 2.05 | 
+ IADL | 1.07 | 5.71 |  
+ NPIQ_SEV | 1.69 | 2.98 |
+| NPIQ_COUNT | 1.04 | 1.93 |  
+MMSE | 1.89 | 5.12 |
+- base_v1 (collapsed) and coupled_fb (free bits) lose to LOCF on PSMS, IADL, NPI-Q;
+  only MMSE beats LOCF (1.74). Cause: z is the only path for current scores and is a
+  noisy bottleneck. Candidate fix: anchor each decoder on its own domain's current score.

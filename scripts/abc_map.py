@@ -8,24 +8,26 @@ import argparse
 
 import pandas as pd
 
-from alzheimers_trajectory_mapping.diagnostics import domain_history_columns, history_influence
+from alzheimers_trajectory_mapping.diagnostics import (DOMAIN_INPUT_VARIANTS, domain_history_columns,
+                                                       history_influence)
 from alzheimers_trajectory_mapping.evaluate import load_run
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--names", nargs="+", required=True)
 parser.add_argument("--split", default="val")
+parser.add_argument("--variant", default="main", choices=["main", "no_cdr", "scores_only"])
 args = parser.parse_args()
 pd.set_option("display.width", 200)
 
 _, _, meta, _ = load_run(f"outputs/runs/{args.names[0]}")
-assigned, unassigned = domain_history_columns(meta)
+assigned, unassigned = domain_history_columns(meta, DOMAIN_INPUT_VARIANTS[args.variant])
 for D, idx in assigned.items():
     print(D, [meta["feature_columns"][i] for i in idx])
 print("unassigned:", unassigned, "\n")
 
 changes = []
 for name in args.names:
-    _, change = history_influence(f"outputs/runs/{name}", args.split)
+    _, change = history_influence(f"outputs/runs/{name}", args.split, variant=args.variant)
     print(name, "\n", change.round(1).to_string(), "\n")
     changes.append(change.drop(index="intact"))
 stack = pd.concat(changes, keys=range(len(changes)))

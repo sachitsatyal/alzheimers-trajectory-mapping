@@ -18,11 +18,21 @@ from .evaluate import load_run, model_scores
 
 # Which ABC-history inputs belong to which domain (matched as name prefixes).
 # CDR boxes split by content; CDR global mixes domains and stays unassigned.
+DOMAIN_INPUT_VARIANTS = {}  # filled below
+
 DOMAIN_INPUTS = {
     "A": ["OUT_PSMS", "OUT_IADL", "A1_INDEPEND", "C1_CDRCA", "C1_CDRHOB", "C1_CDRPER"],
     "B": ["OUT_NPIQ", "C1_GDS"],
     "C": ["OUT_MMSE", "C1_CDRMEM", "C1_CDROR", "C1_CDRJU", "C1_SS_", "C1_ANIMAL", "C1_CLOCK",
           "C1_CERAD", "C1_TRAIL", "C1_BOSTON", "C1_COWAT", "C1_TOOIMPAIRED", "X1_DECLINE"],
+}
+# Robustness variants of the assignment:
+#   no_cdr       CDR boxes unassigned (they are clinician ratings that mix domains)
+#   scores_only  only the five outcome scores themselves
+DOMAIN_INPUT_VARIANTS = {
+    "main": DOMAIN_INPUTS,
+    "no_cdr": {D: [p for p in prefixes if not p.startswith("C1_CDR")] for D, prefixes in DOMAIN_INPUTS.items()},
+    "scores_only": {"A": ["OUT_PSMS", "OUT_IADL"], "B": ["OUT_NPIQ"], "C": ["OUT_MMSE"]},
 }
 
 
@@ -54,14 +64,15 @@ def z_usage(run_dir, split="val", n_samples=32, device=None) -> pd.DataFrame:
     return crps, change
 
 
-def domain_history_columns(meta: dict) -> tuple:
+def domain_history_columns(meta: dict, domain_inputs: dict = None) -> tuple:
     """Indices of each domain's ABC-history inputs, plus the unassigned column names."""
+    domain_inputs = domain_inputs or DOMAIN_INPUTS
     a, b = meta["category_blocks"]["ABC_HISTORY"]
     columns = meta["feature_columns"]
-    assigned, unassigned = {D: [] for D in DOMAIN_INPUTS}, []
+    assigned, unassigned = {D: [] for D in domain_inputs}, []
     for i in range(a, b):
         name = columns[i].upper()
-        owner = [D for D, prefixes in DOMAIN_INPUTS.items() if any(name.startswith(p) for p in prefixes)]
+        owner = [D for D, prefixes in domain_inputs.items() if any(name.startswith(p) for p in prefixes)]
         if owner:
             assigned[owner[0]].append(i)
         else:
@@ -83,13 +94,13 @@ def shuffle_inputs(indices, seed=0):
     return transform
 
 
-def history_influence(run_dir, split="val", n_samples=32, device=None):
+def history_influence(run_dir, split="val", n_samples=32, device=None, variant="main"):
     """Granger-style ABC map: % CRPS increase of every outcome when one domain's
     PAST scores are shuffled across patients. Off-diagonal entries = how much a
     domain's history helps forecast the other domains (predictive influence)."""
     model, cfg, meta, device = load_run(run_dir, device)
     loader = make_loader(cfg["data"]["processed_dir"], split, cfg["training"]["batch_size"])
-    columns, _ = domain_history_columns(meta)
+    columns, _ = domain_history_columns(meta, DOMAIN_INPUT_VARIANTS[variant])
     rows = {"intact": {k: v["CRPS"] for k, v in model_scores(model, loader, device, n_samples).items()}}
     for D, idx in columns.items():
         scores = model_scores(model, loader, device, n_samples, batch_transform=shuffle_inputs(idx))
