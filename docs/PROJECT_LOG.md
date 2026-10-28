@@ -4,7 +4,7 @@ Complete record of the project from environment setup to the current state.
 Purpose: (1) brief a new Claude conversation in this Project, (2) personal study reference,
 (3) source material for the paper's Data, Method and Results sections.
 
-**Version 1.3 — last updated: 28 October 2026.** (Version history: Section 19.)
+**Version 1.5 — last updated: 28 October 2026.** (Version history: Section 19.)
 **Status:** preprocessing done; model built and selected (J3); Aim 1 and Aim 2 results in hand; ablation study
 complete; two professor meetings held (9 and ~20 October); next work = making the ABC (function–behavior–cognition)
 relationships clear (Section 13); Aim 3 not started.
@@ -409,6 +409,37 @@ in the stable (mostly cognitively normal) subtype**; behavior → others none; f
 Pending: absolute-change check for the stable-group behavior links (low NPI-Q, mean 0.8, makes % changes large);
 `--absolute` option added to `scripts/abc_map_groups.py` (also outputs intact CRPS and change in CRPS points).
 
+**Phase 1 step 3 — absolute changes (no_cdr, matched, `--absolute`, 28 Oct 2026)**
+Increase in CRPS points when a domain's history is scrambled (mean ± sd over 3 models); intact CRPS in brackets.
+
+| Link | All | Stable | Steady decliner | Behavior-escalating |
+|---|---|---|---|---|
+| C → IADL | 0.071* [0.85] | 0.046* [0.66] | 0.094* [0.97] | 0.086* [1.07] |
+| A → IADL (own history) | 0.051* | 0.033* | 0.066* | 0.062* |
+| **Ratio C / own (IADL)** | **1.4** | **1.4** | **1.4** | **1.4** |
+| C → PSMS | 0.027* [0.50] | 0.014 [0.27] | 0.037* [0.56] | 0.036* [0.85] |
+| C → NPI-Q sev | 0.025* [1.25] | 0.050* [0.53] | 0.003 | 0.012 |
+| A → NPI-Q sev | 0.008 | 0.020* | 0.001 | −0.002 |
+| B → NPI-Q sev (own history) | 0.263* | 0.099* | 0.373* | 0.402* |
+| C → MMSE (own history) | 0.194* [1.15] | 0.176* [0.98] | 0.209* | 0.205* |
+
+Findings:
+1. Cognition history is worth **1.4× function's own history** for forecasting IADL, identically in all three subtypes:
+   the most consistent quantitative result so far.
+2. Stable-subtype C → behavior is real (consistent across models) but small in points (+0.05 NPI-Q severity on a 0–36
+   scale); it is about **half** of what behavior's own history contributes in those patients (0.099). Reported as a
+   secondary finding with this framing; function → behavior in stable patients is smaller still (+0.02, ~20% of own).
+3. Absolute changes are comparable within an outcome (column), not across outcomes (different scales).
+
+**Phase 1 step 4 — cross-lagged regression (classical check; code ready 28 Oct 2026, results pending)**
+`cross_lagged.py`, `scripts/cross_lagged.py`. For consecutive visit pairs (gap 0.5–2 y), each outcome's change to the
+next visit is regressed on the three domain levels now (function = IADL, behavior = NPI-Q severity, cognition = MMSE;
+z-scored, oriented so positive = worse; MMSE negated), the outcome's own level, age, baseline diagnosis and gap.
+OLS with patient-clustered (CR1) standard errors, t-test with G − 1 df; Bonferroni threshold for 15 tests p < 0.0033.
+Run on train (all + each subtype) and val (replication). Coefficient = points of worsening per 1 SD worse level.
+Note: own-domain coefficients (e.g. function → IADL change) are usually negative (regression to the mean / ceiling)
+and are not comparable to the scramble test's own-history effect; the cross-domain cells are the comparison.
+
 **Interpretation and limits (for the paper):**
 - This is **directed predictive influence (Granger-style), not causation**: hidden common causes (neuropathology),
   test sensitivity/timing, unmeasured factors (medications, caregivers) and model dependence remain possible.
@@ -555,7 +586,7 @@ recent vs older visits (how far back influence reaches).
 ---
 
 ## 14. Open items
-1. **ABC relationship plan** (Section 13) — Phase 1 steps 1–2 done (D17, D18); next: absolute-change check, then cross-lagged panel model.
+1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses done (D17–D19); next: cross-lagged panel model, then Phase 2 (domain-separated encoders).
 2. paper_context check (latent usage) → adopt or not.
 3. Run `plot_subtypes.py` on the workstation and add real figures to the deck.
 4. Stronger baselines: GRU and linear model.
@@ -731,6 +762,22 @@ Chronological record of major decisions. Dates are approximate where marked (~).
 - Consequences: `abc_groups.group_change` now also returns `intact_crps` and `abs_change`; script options
   `--schemes`, `--absolute`; result files `outputs/abc_maps/<run>_<split>_<variant>[_scheme]_v2.csv`.
 
+### D19 — How the ABC map is reported (28 Oct 2026)
+- Context: % changes inflate effects where baseline error is small (stable patients' NPI-Q).
+- Decision: report each link both as % CRPS increase and as absolute change, and express cross-domain links relative
+  to the outcome's own-history effect (e.g. C → IADL = 1.4 × A → IADL). Stable-subtype C → behavior kept as a
+  secondary, small effect (≈ half of behavior's own history).
+- Evidence: Section 8, Phase 1 step 3.
+- Consequences: Phase 1 scramble analyses complete; next: cross-lagged panel model (independent statistical check).
+
+### D20 — Classical cross-lagged regression as the independent check (28 Oct 2026)
+- Context: Phase 1 step 4; the professor's team should see the ABC links with a familiar statistical method.
+- Options: random-intercept mixed model (statsmodels, new dependency) vs OLS with patient-clustered standard errors.
+- Decision: OLS with patient-clustered (CR1) SEs, no new dependency; mixed model as a possible sensitivity check later.
+  Domains represented by one score each (IADL, NPI-Q severity, MMSE); a neuropsych composite for cognition is a
+  follow-up (the scramble test showed most C → A information is beyond MMSE).
+- Consequences: new `cross_lagged.py`, script, 3 tests (83 total).
+
 ---
 
 ## 17. Glossary (plain language)
@@ -772,3 +819,5 @@ Chronological record of major decisions. Dates are approximate where marked (~).
 | 1.1 | 28 Oct 2026 | Added versioning rules and this history; from now on the log is updated after every decision |
 | 1.2 | 28 Oct 2026 | Phase 1 step 1 results: per-subtype ABC maps, random vs diagnosis-matched shuffles (Section 8); decision D17 |
 | 1.3 | 28 Oct 2026 | Phase 1 step 2: no-CDR maps; stable-subtype behavior links survive; function → cognition dropped; absolute-change option (D18) |
+| 1.4 | 28 Oct 2026 | Phase 1 step 3: absolute changes; C → IADL = 1.4× own history in every subtype; reporting rule (D19) |
+| 1.5 | 28 Oct 2026 | Phase 1 step 4: cross-lagged regression implemented (D20); results pending |
