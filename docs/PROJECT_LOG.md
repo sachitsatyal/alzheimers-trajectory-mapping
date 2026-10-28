@@ -4,7 +4,7 @@ Complete record of the project from environment setup to the current state.
 Purpose: (1) brief a new Claude conversation in this Project, (2) personal study reference,
 (3) source material for the paper's Data, Method and Results sections.
 
-**Version 1.9 — last updated: 28 October 2026.** (Version history: Section 19.)
+**Version 2.0 — last updated: 28 October 2026.** (Version history: Section 19.)
 **Status:** preprocessing done; model built and selected (J3); Aim 1 and Aim 2 results in hand; ablation study
 complete; two professor meetings held (9 and ~20 October); next work = making the ABC (function–behavior–cognition)
 relationships clear (Section 13); Aim 3 not started.
@@ -498,12 +498,42 @@ Reading:
    domains) and the patient mean uses future visits. Test (D22): add each domain's previous change (t−1 → t) and years
    since enrollment to the regression.
 
-**Phase 1 step 6 — history-adjusted regression (code ready 28 Oct 2026, results pending)**
+**Phase 1 step 6 — history-adjusted regression (run 28 Oct 2026)**
 `scripts/cross_lagged.py` section "HISTORY-ADJUSTED": adds each domain's previous slope (points/year from visit t−1 to t:
 IADL, PSMS, NPI-Q severity, MMSE, neuropsych composite) and years since entry, i.e. what the deep model already knows.
 Pairs need three consecutive visits (gaps 0.5–2 y). Columns compared on the same subset: composite, composite + history,
 within, within + history; plus all terms of the MMSE-change model and per-subtype results.
 Output: `outputs/cross_lagged_<split>_history.csv`. Decisive cell: function → MMSE.
+
+Results (history subset: train 4,327 pairs / 1,332 patients; val 935 / 284). Composite levels, same subset,
+without → with history covariates (train | val):
+
+| Link | Train | Val | Verdict |
+|---|---|---|---|
+| Cognition → PSMS | +0.34*** → +0.30*** | +0.40*** → +0.36** | survives history |
+| Cognition → IADL | +0.61*** → +0.48*** | +0.76*** → +0.71*** | survives history |
+| **Function → MMSE** | +0.69*** → **+0.53*** ** | +0.60** → **+0.22 (n.s.)** | shrinks 23% / 63%; weak |
+| Cognition → NPI-Q sev | +0.30*** → +0.25** | +0.18 → +0.30 | small, same direction in both |
+| Cognition → NPI-Q count | +0.15*** → +0.13** | +0.12 → +0.17 | small, same direction in both |
+| Function → NPI-Q sev | −0.10 → −0.26* | +0.48* → +0.27 | inconsistent sign: none |
+| Behavior → function / MMSE | IADL +0.15* → +0.14*; MMSE ≈0 | ≈0 | none (not replicated) |
+
+MMSE-change model with history (train | val): cognition level +1.40*** | +1.29***; MMSE previous slope −0.48*** |
+−0.68***; IADL previous slope +0.23** | +0.40**; neuropsych previous slope +0.10** | +0.20*; years since entry
++0.08* | +0.22**; function level +0.53*** | +0.22 (n.s.). Recent IADL decline still predicts MMSE decline a little.
+
+**Phase 1 conclusion — consolidated ABC map**
+
+| Link | Status | Evidence |
+|---|---|---|
+| **Cognition → function** | **Robust** | Scramble (1.4× own history, every subtype) + regression (all 4 specifications, history-adjusted, both splits, all subtypes) |
+| Function → cognition | Weak / possible | Regression only; shrinks with history (train +0.53***, val +0.22 n.s.); scramble ≈0 |
+| Cognition → behavior | Weak / possible | Regression composite +0.13 to +0.30 (train significant, val same direction); scramble small, stable subtype only |
+| Function → behavior | None | Inconsistent sign across splits; scramble ≈0 overall |
+| Behavior → function / cognition | **None** | Both methods ≈0 |
+
+Within-person coefficients are larger and noisier (patient mean uses future visits); the **history-adjusted composite
+level model is the primary regression result**.
 
 **Interpretation and limits (for the paper):**
 - This is **directed predictive influence (Granger-style), not causation**: hidden common causes (neuropathology),
@@ -639,7 +669,7 @@ not a failure. Choices (e.g. lasso strength) are made on validation accuracy, no
 
 | Phase | Work | Est. time |
 |---|---|---|
-| 1. Quick checks (current model, no retraining) | ABC map per subtype; diagnosis-matched scramble; 10 repeated shuffles for error bars; classic cross-lagged panel model as independent statistical check | 2 days |
+| 1. Quick checks (current model, no retraining) — **done 28 Oct (D17–D23)** | ABC map per subtype; diagnosis-matched scramble; 10 repeated shuffles for error bars; classic cross-lagged panel model as independent statistical check | 2 days |
 | 2. Domain-separated encoders | Block A built only from function inputs, B from behavior, C from cognition, S from context (demographic, clinical, biomarker, genomic, social, caregiver), so cross-domain information must pass through W → **W becomes the ABC map**; weaker/tuned lasso; W per subtype; optional nonlinear coupling read via ∂f_A/∂z_C | 7 days |
 | 3. Multi-year forecasts | Forecast 1, 2, 3 visits ahead by rolling the ODE without re-encoding; scramble test at 2–3 years (also needed for Aim 3) | 4 days |
 | 4. Validation | Synthetic data with known links (does the model recover them?); 5 seeds with confidence intervals; agreement of 3 methods (W, scramble at multi-year, cross-lagged model); optional NPI-Q symptom clusters (mood / agitation / psychosis) | 5 days |
@@ -651,7 +681,7 @@ recent vs older visits (how far back influence reaches).
 ---
 
 ## 14. Open items
-1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses (D17–D19) and cross-lagged regression (D20) done; within/between and composite regression done (D21, D22); next: history-adjusted regression for function → cognition, then Phase 2.
+1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses (D17–D19) and cross-lagged regression (D20) done; **Phase 1 complete (D17–D23)**; next: Phase 2 (domain-separated encoders).
 2. paper_context check (latent usage) → adopt or not.
 3. Run `plot_subtypes.py` on the workstation and add real figures to the deck.
 4. Stronger baselines: GRU and linear model.
@@ -858,6 +888,14 @@ Chronological record of major decisions. Dates are approximate where marked (~).
   survives adding each domain's previous change and time since enrollment (history-adjusted regression).
 - Evidence: Section 8, Phase 1 step 5.
 
+### D23 — Phase 1 closed; consolidated ABC map; primary regression specification (28 Oct 2026)
+- Decision: ABC map = cognition → function robust; function → cognition and cognition → behavior weak/possible;
+  function → behavior and behavior → others none. Primary regression = composite levels + history covariates
+  (within-person version reported as sensitivity because the patient mean uses future visits).
+- Evidence: Section 8, Phase 1 steps 1–6 (two methods, two splits, three subtypes).
+- Consequences: Phase 2 (domain-separated encoders, W as the ABC map) starts with explicit targets: recover a strong
+  W(A←C); check whether W(C←A) and W(B←C) are small but nonzero; W(·←B) ≈ 0.
+
 ---
 
 ## 17. Glossary (plain language)
@@ -905,3 +943,4 @@ Chronological record of major decisions. Dates are approximate where marked (~).
 | 1.7 | 28 Oct 2026 | Extended cross-lagged regression implemented (within/between, composite measures; 85 tests); results pending |
 | 1.8 | 28 Oct 2026 | Extended regression results: cognition → function and isolated behavior established; function → cognition disagreement; plan D22 |
 | 1.9 | 28 Oct 2026 | History-adjusted regression implemented (86 tests); results pending |
+| 2.0 | 28 Oct 2026 | Phase 1 complete: history-adjusted results, consolidated ABC map, primary specification (D23) |
