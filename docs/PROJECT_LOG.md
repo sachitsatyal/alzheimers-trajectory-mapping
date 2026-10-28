@@ -4,7 +4,7 @@ Complete record of the project from environment setup to the current state.
 Purpose: (1) brief a new Claude conversation in this Project, (2) personal study reference,
 (3) source material for the paper's Data, Method and Results sections.
 
-**Version 1.5 — last updated: 28 October 2026.** (Version history: Section 19.)
+**Version 1.7 — last updated: 28 October 2026.** (Version history: Section 19.)
 **Status:** preprocessing done; model built and selected (J3); Aim 1 and Aim 2 results in hand; ablation study
 complete; two professor meetings held (9 and ~20 October); next work = making the ABC (function–behavior–cognition)
 relationships clear (Section 13); Aim 3 not started.
@@ -431,7 +431,7 @@ Findings:
    secondary finding with this framing; function → behavior in stable patients is smaller still (+0.02, ~20% of own).
 3. Absolute changes are comparable within an outcome (column), not across outcomes (different scales).
 
-**Phase 1 step 4 — cross-lagged regression (classical check; code ready 28 Oct 2026, results pending)**
+**Phase 1 step 4 — cross-lagged regression (classical check; run 28 Oct 2026)**
 `cross_lagged.py`, `scripts/cross_lagged.py`. For consecutive visit pairs (gap 0.5–2 y), each outcome's change to the
 next visit is regressed on the three domain levels now (function = IADL, behavior = NPI-Q severity, cognition = MMSE;
 z-scored, oriented so positive = worse; MMSE negated), the outcome's own level, age, baseline diagnosis and gap.
@@ -439,6 +439,35 @@ OLS with patient-clustered (CR1) standard errors, t-test with G − 1 df; Bonfer
 Run on train (all + each subtype) and val (replication). Coefficient = points of worsening per 1 SD worse level.
 Note: own-domain coefficients (e.g. function → IADL change) are usually negative (regression to the mean / ceiling)
 and are not comparable to the scramble test's own-history effect; the cross-domain cells are the comparison.
+
+Results (coefficient = points of worsening per 1 SD worse level now; SDs: IADL 6.1, NPI-Q sev 3.9, MMSE 5.5;
+train 7,603 pairs / 1,997 patients; val 1,637 / 432). Cross-domain cells, all patients:
+
+| Link | Train | Val | Scramble test (matched, no CDR) | Agree? |
+|---|---|---|---|---|
+| Cognition → PSMS / IADL | +0.44*** / +0.55*** | +0.36*** / +0.56** | 5.5% / 8.4% (1.4× own) | **yes** |
+| Behavior → function / cognition | +0.02 / +0.17*** (IADL), +0.02 (MMSE) | +0.04 / +0.07, −0.10 | ≈0 | yes (IADL train only, not replicated) |
+| Cognition → behavior (sev) | +0.10 | 0.00 | 2.0% (stable only) | roughly (weak) |
+| **Function → behavior** (sev / count) | **+0.41*** / +0.27*** ** | **+0.72** / +0.38*** ** | 0.7% / 0.8% (stable 3.7% / 4.2%) | **no** |
+| **Function → cognition** (MMSE) | **+1.10*** ** | **+1.44*** ** | 0.8% (n.s.) | **no** |
+
+Per subtype (train): cognition → function significant in all three; cognition → NPI-Q sev only in steady decliners
+(+0.49***, not replicated in val +0.32). Own-domain cells negative as expected (regression to the mean).
+
+Interpretation of the disagreements: the regression uses one score per domain at one visit; the scramble test uses the
+model, which sees the full history and all neuropsych tests. Likely explanations: (1) **measurement proxy** — IADL
+(money, medications, phone) is cognitively demanding and can stand in for cognitive severity that MMSE alone misses;
+(2) **between-person vs within-person** — a standard cross-lagged regression mixes stable differences between people
+("sicker people decline faster everywhere") with within-person dynamics (Hamaker et al. 2015 critique).
+Tests planned (D21): within/between-person decomposition and richer domain measures.
+
+**Phase 1 step 5 — extended cross-lagged regression (code ready 28 Oct 2026, results pending)**
+Four specifications in `scripts/cross_lagged.py`: single (IADL / NPI-Q sev / MMSE), single_within, composite
+(function = mean z of IADL and PSMS; cognition = mean z of MMSE and a neuropsych composite: mean of available oriented
+test z-scores, ≥ 2 tests; tests flipped if they correlate negatively with worse MMSE; behavior = NPI-Q severity), and
+**composite_within (primary)**: each predictor split into the patient's own average (between-person) and deviation
+from it (within-person). Output: agreement table of all 10 cross-domain links across specifications, the
+between-person part, and the primary specification per subtype. Caveat: patient average uses all of that patient's visits.
 
 **Interpretation and limits (for the paper):**
 - This is **directed predictive influence (Granger-style), not causation**: hidden common causes (neuropathology),
@@ -586,7 +615,7 @@ recent vs older visits (how far back influence reaches).
 ---
 
 ## 14. Open items
-1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses done (D17–D19); next: cross-lagged panel model, then Phase 2 (domain-separated encoders).
+1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses (D17–D19) and cross-lagged regression (D20) done; next: within/between-person and composite-measure regression (D21), then Phase 2.
 2. paper_context check (latent usage) → adopt or not.
 3. Run `plot_subtypes.py` on the workstation and add real figures to the deck.
 4. Stronger baselines: GRU and linear model.
@@ -778,6 +807,14 @@ Chronological record of major decisions. Dates are approximate where marked (~).
   follow-up (the scramble test showed most C → A information is beyond MMSE).
 - Consequences: new `cross_lagged.py`, script, 3 tests (83 total).
 
+### D21 — Resolve regression vs scramble disagreement before Phase 2 (28 Oct 2026)
+- Context: both methods agree on cognition → function (strong, replicated) and behavior → others (none); the regression
+  additionally shows function → cognition and function → behavior, which the scramble test does not.
+- Decision: extend the regression with (a) **within-person vs between-person** split of each predictor (patient mean +
+  deviation from it), and (b) **richer domain measures** (cognition = MMSE + neuropsych composite; function = IADL + PSMS
+  composite) before starting Phase 2. Links are reported as robust only if both methods agree.
+- Evidence: Section 8, Phase 1 step 4.
+
 ---
 
 ## 17. Glossary (plain language)
@@ -821,3 +858,5 @@ Chronological record of major decisions. Dates are approximate where marked (~).
 | 1.3 | 28 Oct 2026 | Phase 1 step 2: no-CDR maps; stable-subtype behavior links survive; function → cognition dropped; absolute-change option (D18) |
 | 1.4 | 28 Oct 2026 | Phase 1 step 3: absolute changes; C → IADL = 1.4× own history in every subtype; reporting rule (D19) |
 | 1.5 | 28 Oct 2026 | Phase 1 step 4: cross-lagged regression implemented (D20); results pending |
+| 1.6 | 28 Oct 2026 | Cross-lagged results: cognition → function confirmed; function → cognition/behavior only in regression; plan D21 |
+| 1.7 | 28 Oct 2026 | Extended cross-lagged regression implemented (within/between, composite measures; 85 tests); results pending |
