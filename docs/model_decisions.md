@@ -136,3 +136,33 @@ MMSE | 1.89 | 5.12 |
      decliners inconsistently across seeds.
    - ARI 0.41-0.45 with consistent profiles: soft phenotypes on a continuum; final
      assignments via consensus across seeds; report probabilities.
+
+## Ablation study (scripts/ablations.py; 16 variants x 3 seeds vs base J3; validation CRPS)
+% change vs base (positive = ablation worse); * = beyond ~2 sd of seed noise
+
+| Variant | PSMS | IADL | NPIQ_SEV | NPIQ_COUNT | MMSE |
+|---|---|---|---|---|---|
+| no_ode | -2.2 | -2.7 | 1.3 | 1.2 | -0.9 |
+| sde | -1.5 | -1.3 | 0.8 | 1.1 | 0.4 |
+| no_time2vec | 0.0 | -1.1 | 0.4 | 0.5 | 2.2 |
+| no_masks | 0.5 | 4.1* | 0.8 | 1.4 | 3.1* |
+| no_anchor | 2.3 | 1.3 | -2.0 | -1.8 | 1.7 |
+| no_coupling | -0.1 | 0.2 | -0.7 | -0.6 | 0.6 |
+| deterministic | 0.2 | 0.4 | -0.6 | 0.0 | 1.3 |
+| one_subtype | -1.4 | -1.4 | -1.5 | -0.6 | -0.6 |
+| paper_context | -3.5 | -4.2* | -0.3 | -0.1 | -1.8* |
+| drop_demographic | 1.7 | -0.3 | -0.1 | 0.2 | 0.5 |
+| drop_clinical | -1.2 | 0.7 | -1.0 | -1.5 | -1.7* |
+| drop_biomarker | -4.4 | -2.1 | -2.0 | -1.8 | -0.2 |
+| drop_genomic | -1.0 | -0.5 | 0.3 | 0.3 | -0.6 |
+| drop_social | -1.5 | -0.8 | 1.0 | 0.7 | -0.2 |
+| drop_caregiver | -1.2 | -1.6 | -0.3 | -0.2 | -0.9 |
+| drop_abc_history | 2.4 | 8.2* | 1.0 | 1.0 | 9.8* |
+
+Base J3 CRPS: PSMS 0.499, IADL 0.850, NPIQ_SEV 1.244, NPIQ_COUNT 0.771, MMSE 1.144.
+- Accuracy driven by ABC history and observation masks.
+- paper_context (decoders also attend to ABC-history tokens) is better on IADL/MMSE:
+  adopt if latent blocks stay used (check with diagnose.py).
+- ODE, subtypes, SDE, coupling, deterministic, Time2Vec and most categories: no significant
+  one-step effect; they serve Aims 1 and 3. Biomarkers do not help (sparse coverage).
+- To do: GRU and linear baselines; per-domain anchor (no anchor helps NPI-Q slightly, n.s.)

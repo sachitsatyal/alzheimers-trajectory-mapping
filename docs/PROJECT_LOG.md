@@ -4,7 +4,7 @@ Complete record of the project from environment setup to the current state.
 Purpose: (1) brief a new Claude conversation in this Project, (2) personal study reference,
 (3) source material for the paper's Data, Method and Results sections.
 
-**Last updated: 28 October 2026.**
+**Version 1.3 — last updated: 28 October 2026.** (Version history: Section 19.)
 **Status:** preprocessing done; model built and selected (J3); Aim 1 and Aim 2 results in hand; ablation study
 complete; two professor meetings held (9 and ~20 October); next work = making the ABC (function–behavior–cognition)
 relationships clear (Section 13); Aim 3 not started.
@@ -20,6 +20,10 @@ relationships clear (Section 13); Aim 3 not started.
 - Major decision = anything that changes the data pipeline, the model, the evaluation, the reported results, the aims
   or the paper plan. Small code fixes go in git commit messages, not here.
 - Numbers are on the **validation split** unless stated. The **test split has not been used**.
+- **Versioning:** every update after a decision raises the version (minor = new decision/result, e.g. 1.1 → 1.2;
+  major = new phase or aim, e.g. 1.x → 2.0) and adds one line to the **Version History (Section 19)**.
+  Claude keeps the Project copy (`claude/PROJECT_LOG.md`) current after every decision from 28 Oct 2026 onward;
+  the repository copy (`docs/PROJECT_LOG.md`) is refreshed from it and committed.
 
 ---
 
@@ -345,6 +349,66 @@ tests, clock, CERAD, animal fluency, too-impaired, decline reports. Unassigned: 
 anchor), mostly via detailed neuropsychological tests beyond MMSE; consistent with cognitive decline preceding
 functional loss. Function → others ~1%; behavior self-contained. Within-gap coupling W ≈ 0.
 
+**Phase 1 step 1 — per-subtype maps with random and diagnosis-matched shuffles (28 Oct 2026)**
+Code: `abc_groups.py`, `scripts/abc_map_groups.py` (shuffle over the whole val split; "matched" = partner has the same
+baseline diagnosis; 10 repeated shuffles per model; J3_s1–s3; consensus subtypes from `outputs/consensus_val.csv`;
+results in `outputs/abc_maps/`). Mean ± sd across 3 models of % CRPS increase; * = mean > 2 sd.
+Val patients: stable 233, steady decliner 207, behavior-escalating 112; normal 231, dementia 194, MCI/other 127.
+Forecasts: PSMS 1,642, IADL 1,429, NPI-Q sev 1,641, count 1,642, MMSE 1,644.
+
+Matched shuffle, all patients (primary result):
+
+| history ↓ / forecast → | PSMS | IADL | NPI-Q sev | NPI-Q count | MMSE |
+|---|---|---|---|---|---|
+| A function | 2.4±1.0* | 5.8±0.3* | 1.5±0.8 | 1.8±1.0 | 1.3±0.4* |
+| B behavior | 0.4±0.5 | −0.3±0.3 | 21.2±3.6* | 13.1±1.5* | 0.7±1.0 |
+| C cognition | 5.6±2.7* | 8.5±0.9* | 3.3±1.4* | 4.1±1.6* | 16.2±2.0* |
+
+Random shuffle, all patients: C → A 6.6±2.9* / 12.0±2.5*; C → B 4.4±1.2* / 5.7±1.6*; A → A 2.2* / 6.9*; B → B 24.9* / 14.7*.
+
+Matched shuffle per subtype (key cells; full tables in `outputs/abc_maps/summary_val_main.csv`):
+
+| Link | Stable | Steady decliner | Behavior-escalating |
+|---|---|---|---|
+| C → function (PSMS / IADL) | 5.9* / 6.7* | 6.3 / 9.8* | 4.6* / 8.7* |
+| C → behavior (sev / count) | **12.5* / 14.7*** (sd 6–7) | 0.3 / 0.9* | 2.1* / 1.4* |
+| A → behavior (sev / count) | **7.2* / 7.8*** | 0.6 / 0.6 | 0.0 / −0.3 |
+| A → MMSE | 1.0* | 1.6* | 1.3 |
+| B → function / cognition | ≈0 | ≈0 | ≈0 (PSMS 0.7*) |
+| B → B (sev / count) | 18.9* / 11.2* | 29.0* / 22.7* | 15.3* / 4.9 |
+
+Findings:
+1. **Cognition → function is robust**: present in every subtype and after diagnosis matching (IADL 8.5%, larger than
+   function's own history 5.8%). Matching reduced it from 12.0% to 8.5%: about 30% of the earlier effect was shared
+   disease stage; the rest is within-stage information.
+2. **New, subtype-specific links**: in **stable** patients, past function and cognition predict future behavior
+   (7–15%). Hidden in the overall average. Caution: stable patients have very low NPI-Q (mean 0.8), so a small absolute
+   change is a large %; seed sd is large; CDR boxes are included in C (CDR previously explained C → B). To check:
+   `--variant no_cdr` and absolute CRPS changes.
+3. Behavior does not predict function or cognition in any subtype. In behavior-escalating patients, behavior's own
+   history helps less (count 4.9%, n.s.): their symptoms change in ways their past does not predict.
+4. Function → cognition small but consistent (~1–1.6%).
+5. Weak C → B overall (3–4%, significant in this run with CDR included).
+
+**Phase 1 step 2 — same analysis without CDR boxes (`--variant no_cdr`, 28 Oct 2026)**
+Matched shuffle, % CRPS increase (with CDR → without CDR):
+
+| Link | With CDR | Without CDR | Verdict |
+|---|---|---|---|
+| C → function, all (PSMS / IADL) | 5.6* / 8.5* | **5.5* / 8.4*** | robust |
+| C → IADL per subtype (stable / steady / behavior-esc.) | 6.7* / 9.8* / 8.7* | **6.9* / 9.7* / 8.1*** | robust in all |
+| C → behavior, stable (sev / count) | 12.5* / 14.7* (sd 6–7) | **9.5* / 10.6*** (sd ~3) | survives |
+| A → behavior, stable (sev / count) | 7.2* / 7.8* | **3.7* / 4.2*** | survives, halved |
+| C → behavior, steady / behavior-esc. | 0.3 / 2.1* | 0.2 / 0.5 | none |
+| C → behavior, all | 3.3* / 4.1* | 2.0* / 2.3* | small; driven by stable patients |
+| A → MMSE, all | 1.3* | 0.8 (n.s.) | came from CDR boxes; not claimed |
+| B → function / cognition | ≈0 | ≈0 | none |
+
+Current ABC picture: **cognition → function** strong and robust everywhere; **cognition and function → behavior only
+in the stable (mostly cognitively normal) subtype**; behavior → others none; function → cognition none after removing CDR.
+Pending: absolute-change check for the stable-group behavior links (low NPI-Q, mean 0.8, makes % changes large);
+`--absolute` option added to `scripts/abc_map_groups.py` (also outputs intact CRPS and change in CRPS points).
+
 **Interpretation and limits (for the paper):**
 - This is **directed predictive influence (Granger-style), not causation**: hidden common causes (neuropathology),
   test sensitivity/timing, unmeasured factors (medications, caregivers) and model dependence remain possible.
@@ -491,7 +555,7 @@ recent vs older visits (how far back influence reaches).
 ---
 
 ## 14. Open items
-1. **ABC relationship plan** (Section 13) — next.
+1. **ABC relationship plan** (Section 13) — Phase 1 steps 1–2 done (D17, D18); next: absolute-change check, then cross-lagged panel model.
 2. paper_context check (latent usage) → adopt or not.
 3. Run `plot_subtypes.py` on the workstation and add real figures to the deck.
 4. Stronger baselines: GRU and linear model.
@@ -650,6 +714,23 @@ Chronological record of major decisions. Dates are approximate where marked (~).
   forecasts → validation (synthetic recovery, seeds, three-method agreement).
 - Decision: document everything in this log, with a Decision Log entry after each major decision.
 
+### D17 — Diagnosis-matched, per-subtype ABC map as the primary scramble analysis (28 Oct 2026)
+- Context: Phase 1 step 1; original map shuffled across all patients within batches (mixes disease stage) and averaged over subtypes.
+- Decision: report the **matched** shuffle (same baseline diagnosis, whole val split, 10 repeats, 3 J3 models) as the
+  primary map; random shuffle as a secondary; maps per consensus subtype.
+- Evidence: Section 8 (Phase 1 step 1). Cognition → function survives matching in every subtype; stable-subtype
+  function/cognition → behavior links found, pending CDR and absolute-change checks.
+- Consequences: new `abc_groups.py`, `scripts/abc_map_groups.py`, tests (80 total). Next: `--variant no_cdr` run.
+
+### D18 — No-CDR matched map is the primary ABC map (28 Oct 2026)
+- Context: CDR boxes are clinician ratings that mix domains; earlier they created a spurious C → B link.
+- Decision: report the **no_cdr, diagnosis-matched** map as primary (with-CDR and random as sensitivity analyses).
+  Drop function → cognition (n.s. without CDR). Stable-subtype C/A → behavior links kept as provisional until the
+  absolute-change check.
+- Evidence: Section 8, Phase 1 step 2.
+- Consequences: `abc_groups.group_change` now also returns `intact_crps` and `abs_change`; script options
+  `--schemes`, `--absolute`; result files `outputs/abc_maps/<run>_<split>_<variant>[_scheme]_v2.csv`.
+
 ---
 
 ## 17. Glossary (plain language)
@@ -680,3 +761,14 @@ Chronological record of major decisions. Dates are approximate where marked (~).
 - A shared encoder makes explicit coupling (W) redundant; to read relationships from the model, information paths must
   be separated by design.
 - Check stated defaults against the code (evaluation sample count).
+
+---
+
+## 19. Version History
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | 28 Oct 2026 | Full log through 28 Oct: ablations, presentations, architecture v2, evaluation details, ABC plan, decision log D1–D16, glossary |
+| 1.1 | 28 Oct 2026 | Added versioning rules and this history; from now on the log is updated after every decision |
+| 1.2 | 28 Oct 2026 | Phase 1 step 1 results: per-subtype ABC maps, random vs diagnosis-matched shuffles (Section 8); decision D17 |
+| 1.3 | 28 Oct 2026 | Phase 1 step 2: no-CDR maps; stable-subtype behavior links survive; function → cognition dropped; absolute-change option (D18) |
