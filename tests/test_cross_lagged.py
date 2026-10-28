@@ -102,3 +102,28 @@ def test_neuropsych_composite_orientation():
     out, tests = add_composites(pairs, {"X": X, "M": np.ones_like(X)}, meta)
     assert list(tests["sign"]) == [1.0, -1.0]
     assert np.corrcoef(out["cognition_comp_now"], worse)[0, 1] > 0.9
+
+
+def test_history_adjustment_removes_a_proxy_link():
+    """Function only looks predictive because it tracks cognition's recent slope; adding
+    each domain's previous slope must remove the function -> MMSE link."""
+    rng = np.random.default_rng(3)
+    n = 3000
+    slope = rng.normal(size=n)                               # cognition's recent decline (true driver)
+    d = pd.DataFrame({"PATID": np.arange(n) // 3, "gap": 1.0, "age": 70.0, "dx": "normal",
+                      "MMSE_now": rng.normal(size=n), "NPIQ_SEV_now": rng.normal(size=n),
+                      "IADL_now": 0.8 * slope + 0.6 * rng.normal(size=n)})
+    d["MMSE_change"] = 1.0 * slope + 0.5 * rng.normal(size=n)
+    d["MMSE_prev_slope"] = slope
+    for c in ["IADL", "PSMS", "NPIQ_SEV", "NEURO"]:
+        d[f"{c}_prev_slope"] = rng.normal(size=n)
+    d["years_since_entry"] = rng.uniform(1, 5, n)
+    for o in ["PSMS", "IADL", "NPIQ_SEV", "NPIQ_COUNT"]:
+        d[f"{o}_change"] = rng.normal(size=n)
+    d["PSMS_now"], d["NPIQ_COUNT_now"] = 0.0, 0.0
+    from alzheimers_trajectory_mapping.cross_lagged import HISTORY_COVARIATES
+    plain = cross_lagged_table(d).set_index(["outcome", "predictor"])
+    adjusted = cross_lagged_table(d, extra=HISTORY_COVARIATES)
+    adjusted = adjusted[adjusted.part != "covariate"].set_index(["outcome", "predictor"])
+    assert plain.loc[("MMSE", "function"), "p"] < 1e-6
+    assert abs(adjusted.loc[("MMSE", "function"), "coef"]) < 0.05

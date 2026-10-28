@@ -23,8 +23,9 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from alzheimers_trajectory_mapping.cross_lagged import (OUTCOMES, SPECS, add_composites, cross_domain,
-                                                        cross_lagged_table, predictor_scale, visit_pairs)
+from alzheimers_trajectory_mapping.cross_lagged import (HISTORY_COVARIATES, OUTCOMES, SPECS, add_composites,
+                                                        cross_domain, cross_lagged_table, predictor_scale,
+                                                        visit_pairs)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--split", default="train")
@@ -105,4 +106,44 @@ print("=== PRIMARY (composite measures, within-person) | cross-domain links per 
 print(per_group.reindex([l for l in order if l in per_group.index])[cols].to_string(), "\n")
 n = out[(out.spec == "composite_within") & (out.group == "all")].groupby("outcome")["pairs"].first()
 print("pairs per outcome (composite_within, all):", n.reindex(OUTCOMES).to_dict())
-print(f"saved outputs/cross_lagged_{args.split}.csv")
+print(f"saved outputs/cross_lagged_{args.split}.csv\n")
+
+# 4) History adjustment: add what the deep model already knows (each domain's previous slope,
+#    years since entry). Same subset of pairs (3 consecutive visits) for every column.
+H = pairs.dropna(subset=HISTORY_COVARIATES)
+comp = SPECS["composite"]
+scale_c = predictor_scale(pairs, comp)
+print(f"=== HISTORY-ADJUSTED | {len(H)} pairs with a previous interval (0.5-2 y) "
+      f"from {H['PATID'].nunique()} patients")
+hist_runs = [("composite (all pairs)", pairs, False, None), ("composite (history subset)", H, False, None),
+             ("composite + history", H, False, HISTORY_COVARIATES),
+             ("within (history subset)", H, True, None), ("within + history", H, True, HISTORY_COVARIATES)]
+hist_results = []
+for label, data, within, extra in hist_runs:
+    for g_label, g_data in [("all", data)] + [(g, data[data["subtype"] == g])
+                                              for g in ["stable", "steady_decliner", "behavior_escalating"]
+                                              if (data["subtype"] == g).any()]:
+        tab = cross_lagged_table(g_data, scale_c, comp, within, extra).assign(spec=label, group=g_label)
+        hist_results.append(tab)
+hist = pd.concat(hist_results, ignore_index=True)
+hist.to_csv(f"outputs/cross_lagged_{args.split}_history.csv", index=False)
+h = links(hist[(hist.group == "all") & (hist.part != "between")])
+h["cell"] = h.apply(fmt, axis=1)
+tab_h = h.pivot(index="link", columns="spec", values="cell")
+tab_h = tab_h.reindex([l for l in order if l in tab_h.index])[[r[0] for r in hist_runs]]
+print(tab_h.to_string(), "\n")
+
+# 5) Which history terms carry the information for MMSE change (composite + history)?
+cov = hist[(hist.group == "all") & (hist.spec == "composite + history") & (hist.outcome == "MMSE")].copy()
+cov["cell"] = cov.apply(lambda r: f"{r.coef:+.2f} [{r.ci_low:+.2f},{r.ci_high:+.2f}]{stars(r.p)}", axis=1)
+print("=== MMSE change, composite + history: all terms (covariates per 1 SD)")
+print(cov.set_index(["part", "predictor"])["cell"].to_string(), "\n")
+
+# 6) Per subtype, composite + history
+s6 = links(hist[(hist.spec == "composite + history")])
+s6["cell"] = s6.apply(fmt, axis=1)
+per = s6.pivot(index="link", columns="group", values="cell")
+cols6 = [g for g in ["all", "stable", "steady_decliner", "behavior_escalating"] if g in per.columns]
+print("=== composite + history | cross-domain links per subtype")
+print(per.reindex([l for l in order if l in per.index])[cols6].to_string(), "\n")
+print(f"saved outputs/cross_lagged_{args.split}_history.csv")

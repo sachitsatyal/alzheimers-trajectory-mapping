@@ -4,7 +4,7 @@ Complete record of the project from environment setup to the current state.
 Purpose: (1) brief a new Claude conversation in this Project, (2) personal study reference,
 (3) source material for the paper's Data, Method and Results sections.
 
-**Version 1.7 — last updated: 28 October 2026.** (Version history: Section 19.)
+**Version 1.9 — last updated: 28 October 2026.** (Version history: Section 19.)
 **Status:** preprocessing done; model built and selected (J3); Aim 1 and Aim 2 results in hand; ablation study
 complete; two professor meetings held (9 and ~20 October); next work = making the ABC (function–behavior–cognition)
 relationships clear (Section 13); Aim 3 not started.
@@ -461,13 +461,49 @@ model, which sees the full history and all neuropsych tests. Likely explanations
 ("sicker people decline faster everywhere") with within-person dynamics (Hamaker et al. 2015 critique).
 Tests planned (D21): within/between-person decomposition and richer domain measures.
 
-**Phase 1 step 5 — extended cross-lagged regression (code ready 28 Oct 2026, results pending)**
+**Phase 1 step 5 — extended cross-lagged regression (run 28 Oct 2026)**
 Four specifications in `scripts/cross_lagged.py`: single (IADL / NPI-Q sev / MMSE), single_within, composite
 (function = mean z of IADL and PSMS; cognition = mean z of MMSE and a neuropsych composite: mean of available oriented
 test z-scores, ≥ 2 tests; tests flipped if they correlate negatively with worse MMSE; behavior = NPI-Q severity), and
 **composite_within (primary)**: each predictor split into the patient's own average (between-person) and deviation
 from it (within-person). Output: agreement table of all 10 cross-domain links across specifications, the
 between-person part, and the primary specification per subtype. Caveat: patient average uses all of that patient's visits.
+
+Results. Neuropsych composite: 13 tests (clock, CERAD delay/total, animal fluency, digit span, Trails A/B, logical
+memory I/II, visual reproduction I/II, Boston naming, COWAT), all scaled so higher = better and flipped (r with worse
+MMSE −0.49 to −0.69). Composite available for 7,594 / 7,603 train pairs.
+
+Cross-domain coefficients, all patients (train → val; points of worsening per 1 SD worse):
+
+| Link | single | composite | composite_within (primary) | Scramble test |
+|---|---|---|---|---|
+| Cognition → PSMS | +0.44*** → +0.36*** | +0.38*** → +0.33*** | **+1.23*** → +1.37*** ** | yes (5.5%) |
+| Cognition → IADL | +0.55*** → +0.56** | +0.66*** → +0.74*** | **+1.64*** → +1.37*** ** | yes (8.4%, 1.4× own) |
+| Function → MMSE | +1.10*** → +1.44*** | +0.67*** → +0.81*** | **+1.67*** → +1.80*** ** | **no** (0.8%, n.s.) |
+| Function → NPI-Q sev | +0.41*** → +0.72** | +0.08 → +0.48* | +0.05 → +1.17*** | ≈0 (stable 3.7%) |
+| Cognition → NPI-Q sev | +0.10 → 0.00 | +0.30*** → +0.21 | +0.59** → +0.07 | small (stable only) |
+| Behavior → function / MMSE | IADL +0.17*** → +0.07 | IADL +0.17*** → +0.10 | ≈0 → ≈0 | ≈0 |
+
+Per subtype (composite_within, train): cognition → PSMS/IADL significant in all three (PSMS +0.73 / +1.15 / +2.47;
+IADL +0.95 / +2.22 / +1.59); function → MMSE significant in all three (+2.19 / +1.73 / +1.19).
+
+Reading:
+1. **Robust in both methods, all specifications, both splits:** cognition → function; behavior → nothing.
+2. **Function → behavior and cognition → behavior: not replicated** across splits (significant in one split only) →
+   no robust link.
+3. **Function → cognition: robust in the regression, absent in the scramble test** — the one real disagreement.
+   Candidate explanations: (a) the regression knows only current levels; worse function may mark a person who is in a
+   declining phase (a proxy for cognitive slope), while the model sees cognition's full history and slope, so function
+   adds nothing unique there; (b) within-person estimates can carry a shared time trend (later visits = worse in both
+   domains) and the patient mean uses future visits. Test (D22): add each domain's previous change (t−1 → t) and years
+   since enrollment to the regression.
+
+**Phase 1 step 6 — history-adjusted regression (code ready 28 Oct 2026, results pending)**
+`scripts/cross_lagged.py` section "HISTORY-ADJUSTED": adds each domain's previous slope (points/year from visit t−1 to t:
+IADL, PSMS, NPI-Q severity, MMSE, neuropsych composite) and years since entry, i.e. what the deep model already knows.
+Pairs need three consecutive visits (gaps 0.5–2 y). Columns compared on the same subset: composite, composite + history,
+within, within + history; plus all terms of the MMSE-change model and per-subtype results.
+Output: `outputs/cross_lagged_<split>_history.csv`. Decisive cell: function → MMSE.
 
 **Interpretation and limits (for the paper):**
 - This is **directed predictive influence (Granger-style), not causation**: hidden common causes (neuropathology),
@@ -615,7 +651,7 @@ recent vs older visits (how far back influence reaches).
 ---
 
 ## 14. Open items
-1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses (D17–D19) and cross-lagged regression (D20) done; next: within/between-person and composite-measure regression (D21), then Phase 2.
+1. **ABC relationship plan** (Section 13) — Phase 1 scramble analyses (D17–D19) and cross-lagged regression (D20) done; within/between and composite regression done (D21, D22); next: history-adjusted regression for function → cognition, then Phase 2.
 2. paper_context check (latent usage) → adopt or not.
 3. Run `plot_subtypes.py` on the workstation and add real figures to the deck.
 4. Stronger baselines: GRU and linear model.
@@ -815,6 +851,13 @@ Chronological record of major decisions. Dates are approximate where marked (~).
   composite) before starting Phase 2. Links are reported as robust only if both methods agree.
 - Evidence: Section 8, Phase 1 step 4.
 
+### D22 — Consolidated ABC links and test of the function → cognition disagreement (28 Oct 2026)
+- Context: extended regression (Phase 1 step 5).
+- Decision: treat **cognition → function** and **behavior isolated** as established (two methods, four specifications,
+  two splits). Treat function/cognition → behavior as not established. Before Phase 2, test whether function → cognition
+  survives adding each domain's previous change and time since enrollment (history-adjusted regression).
+- Evidence: Section 8, Phase 1 step 5.
+
 ---
 
 ## 17. Glossary (plain language)
@@ -860,3 +903,5 @@ Chronological record of major decisions. Dates are approximate where marked (~).
 | 1.5 | 28 Oct 2026 | Phase 1 step 4: cross-lagged regression implemented (D20); results pending |
 | 1.6 | 28 Oct 2026 | Cross-lagged results: cognition → function confirmed; function → cognition/behavior only in regression; plan D21 |
 | 1.7 | 28 Oct 2026 | Extended cross-lagged regression implemented (within/between, composite measures; 85 tests); results pending |
+| 1.8 | 28 Oct 2026 | Extended regression results: cognition → function and isolated behavior established; function → cognition disagreement; plan D22 |
+| 1.9 | 28 Oct 2026 | History-adjusted regression implemented (86 tests); results pending |
